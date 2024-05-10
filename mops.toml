@@ -1,10 +1,17 @@
-# used only for unit testing
 [dependencies]
-base = "0.8.1"
-cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4"
+base = "https://github.com/dfinity/motoko-base#6557fbefc9a03afff8e0c84591ea78190eb6f723"
+"base-0.7.3" = "https://github.com/dfinity/motoko-base#aafcdee0c8328087aeed506e64aa2ff4ed329b47"
+array = "https://github.com/aviate-labs/array.mo#v0.2.0"
+crypto = "https://github.com/aviate-labs/crypto.mo#v0.1.1"
+encoding = "https://github.com/aviate-labs/encoding.mo#v0.3.2"
+hash = "https://github.com/aviate-labs/hash.mo#v0.1.0"
 accountid = "https://github.com/aviate-labs/principal.mo#v0.2.6"
 canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#v0.0.7"
+cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4"
 
 [dev-dependencies]
 test = "1.0.1"
 fuzz = "0.1.0"
+
+[toolchain]
+moc = "0.8.4"

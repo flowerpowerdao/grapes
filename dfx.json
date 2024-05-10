@@ -41,9 +41,10 @@
       ]
     }
   },
+  "dfx": "0.20.0",
   "defaults": {
     "build": {
-      "packtool": "vessel sources",
+      "packtool": "mops sources",
       "args": ""
     }
   }
