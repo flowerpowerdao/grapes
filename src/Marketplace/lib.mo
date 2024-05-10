@@ -208,7 +208,7 @@ module {
       };
 
       let response = await Ledger.account_balance({
-        account = Blob.fromArray(addHash(fromPrincipal(config.canister, ?settlement.subaccount)));
+        account = addHash(fromPrincipal(config.canister, ?settlement.subaccount));
       });
 
       // because of the await above, we check again if there is a settlement available for the token

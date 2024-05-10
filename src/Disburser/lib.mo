@@ -65,7 +65,7 @@ module {
               var res = await Ledger.transfer({
                 to = switch (AviateAccountIdentifier.fromText(disbursement.to)) {
                   case (#ok(accountId)) {
-                    Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
+                    AviateAccountIdentifier.addHash(accountId);
                   };
                   case (#err(_)) {
                     // this should never happen because account ids are always created from within the
@@ -74,7 +74,7 @@ module {
                     continue payloop;
                   };
                 };
-                from_subaccount = ?Blob.fromArray(disbursement.fromSubaccount);
+                from_subaccount = ?disbursement.fromSubaccount;
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };
                 created_at_time = null;
