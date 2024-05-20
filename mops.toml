@@ -8,6 +8,9 @@ hash = "https://github.com/aviate-labs/hash.mo#v0.1.0"
 accountid = "https://github.com/aviate-labs/principal.mo#v0.2.6"
 canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#v0.0.7"
 cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4"
+icrc1-types = "1.0.0"
+account = "1.0.1"
+ledger-types = "1.0.0"
 
 [dev-dependencies]
 test = "1.0.1"

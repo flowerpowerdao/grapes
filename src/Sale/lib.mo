@@ -1,5 +1,3 @@
-import Ledger "canister:ledger";
-
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
@@ -15,13 +13,15 @@ import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
 import Buffer "mo:base/Buffer";
 import Text "mo:base/Text";
-import { isSome } "mo:base/Option";
+import Debug "mo:base/Debug";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
+import Account "mo:account";
+import LedgerTypes "mo:ledger-types";
+import ICRC1 "mo:icrc1-types";
 
-import AID "../toniq-labs/util/AccountIdentifier";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";
@@ -37,9 +37,9 @@ module {
     * STATE *
     *********/
 
-    var _saleTransactions = Buffer.Buffer<Types.SaleTransaction>(0);
-    var _salesSettlements = TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale>(AID.equal, AID.hash);
-    var _failedSales = Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)>(0);
+    var _saleTransactions = Buffer.Buffer<Types.SaleTransactionV3>(0);
+    var _salesSettlements = TrieMap.TrieMap<Types.Address, Types.SaleV3>(Text.equal, Text.hash);
+    var _failedSales = Buffer.Buffer<Types.SaleV3>(0);
     var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
     var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.RemainingSpots>(Text.equal, Text.hash);
     var _soldIcp = 0 : Nat64;
@@ -56,70 +56,71 @@ module {
     };
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      let start = Nat.min(_saleTransactions.size(), chunkSize * chunkIndex);
-      let count = Nat.min(chunkSize, _saleTransactions.size() - start);
-      let saleTransactionChunk = if (_saleTransactions.size() == 0 or count == 0) {
-        [];
-      } else {
-        Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, count));
-      };
+      null;
+      // let start = Nat.min(_saleTransactions.size(), chunkSize * chunkIndex);
+      // let count = Nat.min(chunkSize, _saleTransactions.size() - start);
+      // let saleTransactionChunk = if (_saleTransactions.size() == 0 or count == 0) {
+      //   [];
+      // } else {
+      //   Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, count));
+      // };
 
-      if (chunkIndex == 0) {
-        ? #v2({
-          saleTransactionCount = _saleTransactions.size();
-          saleTransactionChunk;
-          salesSettlements = Iter.toArray(_salesSettlements.entries());
-          failedSales = Buffer.toArray(_failedSales);
-          tokensForSale = Buffer.toArray(_tokensForSale);
-          whitelistSpots = Iter.toArray(_whitelistSpots.entries());
-          soldIcp = _soldIcp;
-          sold = _sold;
-          totalToSell = _totalToSell;
-          nextSubAccount = _nextSubAccount;
-        });
-      } else if (chunkIndex < getChunkCount(chunkSize)) {
-        return ? #v2_chunk({ saleTransactionChunk });
-      } else {
-        null;
-      };
+      // if (chunkIndex == 0) {
+      //   ? #v2({
+      //     saleTransactionCount = _saleTransactions.size();
+      //     saleTransactionChunk;
+      //     salesSettlements = Iter.toArray(_salesSettlements.entries());
+      //     failedSales = Buffer.toArray(_failedSales);
+      //     tokensForSale = Buffer.toArray(_tokensForSale);
+      //     whitelistSpots = Iter.toArray(_whitelistSpots.entries());
+      //     soldIcp = _soldIcp;
+      //     sold = _sold;
+      //     totalToSell = _totalToSell;
+      //     nextSubAccount = _nextSubAccount;
+      //   });
+      // } else if (chunkIndex < getChunkCount(chunkSize)) {
+      //   return ? #v2_chunk({ saleTransactionChunk });
+      // } else {
+      //   null;
+      // };
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
-      switch (chunk) {
-        // v1
-        case (? #v1(data)) {
-          _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
-          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-          // _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
-          _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
-          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
-          // _whitelistSpots := data.whitelist??; leaving empty for ended sales
-          _soldIcp := data.soldIcp;
-          _sold := data.sold;
-          _totalToSell := data.totalToSell;
-          _nextSubAccount := data.nextSubAccount;
-        };
-        case (? #v1_chunk(data)) {
-          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-        };
-        // v2
-        case (? #v2(data)) {
-          _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
-          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-          _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
-          _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
-          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
-          _whitelistSpots := TrieMap.fromEntries(data.whitelistSpots.vals(), Text.equal, Text.hash);
-          _soldIcp := data.soldIcp;
-          _sold := data.sold;
-          _totalToSell := data.totalToSell;
-          _nextSubAccount := data.nextSubAccount;
-        };
-        case (? #v2_chunk(data)) {
-          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-        };
-        case (null) {};
-      };
+      // switch (chunk) {
+      //   // v1
+      //   case (? #v1(data)) {
+      //     _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
+      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+      //     // _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
+      //     _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
+      //     _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
+      //     // _whitelistSpots := data.whitelist??; leaving empty for ended sales
+      //     _soldIcp := data.soldIcp;
+      //     _sold := data.sold;
+      //     _totalToSell := data.totalToSell;
+      //     _nextSubAccount := data.nextSubAccount;
+      //   };
+      //   case (? #v1_chunk(data)) {
+      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+      //   };
+      //   // v2
+      //   case (? #v2(data)) {
+      //     _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
+      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+      //     _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
+      //     _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
+      //     _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
+      //     _whitelistSpots := TrieMap.fromEntries(data.whitelistSpots.vals(), Text.equal, Text.hash);
+      //     _soldIcp := data.soldIcp;
+      //     _sold := data.sold;
+      //     _totalToSell := data.totalToSell;
+      //     _nextSubAccount := data.nextSubAccount;
+      //   };
+      //   case (? #v2_chunk(data)) {
+      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+      //   };
+      //   case (null) {};
+      // };
     };
 
     public func grow(n : Nat) : Nat {
@@ -130,6 +131,7 @@ module {
           tokens = [fuzz.nat32.random()];
           seller = fuzz.principal.randomPrincipal(10);
           price = fuzz.nat64.random();
+          ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
           buyer = fuzz.text.randomAlphanumeric(32);
           time = fuzz.int.randomRange(1670000000000000000, 2670000000000000000);
         });
@@ -196,7 +198,7 @@ module {
       _tokensForSale.size();
     };
 
-    public func reserve(address : Types.AccountIdentifier) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+    public func reserve(caller : Principal, address : Types.Address, ledger : Principal) : Result.Result<(Types.Address, Nat64), Text> {
       switch (config.sale) {
         case (#duration(duration)) {
           if (Time.now() > config.publicSaleStart + Utils.toNanos(duration)) {
@@ -204,6 +206,24 @@ module {
           };
         };
         case (_) {};
+      };
+
+      // check if caller is owner of the address
+      let addressAccountRes = Account.fromText(address);
+      switch (addressAccountRes) {
+        case (#ok(addressAccount)) {
+          if (caller != addressAccount.owner) {
+            return #err("Reserve can only be called by the owner of the address");
+          };
+        };
+        case (#err(_)) {
+          return #err("Invalid address. Please make sure the address is a valid principal");
+        };
+      };
+
+      // check if the ledger is allowed
+      if (_isLedgerAllowed(ledger)) {
+        return #err("This ledger is not allowed");
       };
 
       let inPendingWhitelist = Option.isSome(getEligibleWhitelist(address, true));
@@ -221,9 +241,9 @@ module {
         return #err("No more NFTs available right now!");
       };
 
-      let price = getAddressPrice(address);
+      let price = getAddressPrice(address, ledger);
       let subaccount = getNextSubAccount();
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
+      let paymentAddress : Types.Address = Account.toText({ owner = config.canister; subaccount = ?Blob.fromArray(subaccount) });
 
       // we only reserve the tokens here, they deducted from the available tokens
       // after payment. otherwise someone could stall the sale by reserving all
@@ -234,6 +254,7 @@ module {
         {
           tokens = tokens;
           price = price;
+          ledger = ledger;
           subaccount = subaccount;
           buyer = address;
           expires = Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2)));
@@ -257,28 +278,29 @@ module {
       #ok((paymentAddress, price));
     };
 
-    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async* Result.Result<(), Text> {
-      if (Option.isNull(_salesSettlements.get(paymentaddress))) {
+    public func retrieve(caller : Principal, paymentAddress : Types.Address, ledger : Principal) : async* Result.Result<(), Text> {
+      if (Option.isNull(_salesSettlements.get(paymentAddress))) {
         return #err("Nothing to settle");
       };
+      if (_isLedgerAllowed(ledger)) {
+        return #err("This ledger is not allowed");
+      };
 
-      let response : Types.Tokens = await Ledger.account_balance({
-        account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
-          case (#ok(accountId)) {
-            AviateAccountIdentifier.addHash(accountId);
-          };
-          case (#err(_)) {
-            // this should never happen because account ids are always created from within the
-            // canister which should guarantee that they are valid and we are able to decode them
-            // to [Nat8]
-            _salesSettlements.delete(paymentaddress);
-            return #err("Failed to decode payment address");
-          };
+      let paymentAccount : ICRC1.Account = switch (Account.fromText(paymentAddress)) {
+        case (#ok(account)) account;
+        case (#err(_)) {
+          // this should never happen because payment accounts are always created from within the canister which should guarantee that they are valid
+          _salesSettlements.delete(paymentAddress);
+          return #err("Failed to decode payment address");
         };
-      });
+      };
 
-      // because of the await above, we check again if there is a settlement available for the paymentaddress
-      let settlement = switch (_salesSettlements.get(paymentaddress)) {
+      let ledgerActor = actor(Principal.toText(ledger)) : ICRC1.Service;
+      let ledgerFee = await* _getLedgerFee(ledger);
+      let balance = Nat64.fromNat(await ledgerActor.icrc1_balance_of(paymentAccount));
+
+      // because of the await above, we check again if there is a settlement available for the paymentAddress
+      let settlement = switch (_salesSettlements.get(paymentAddress)) {
         case (?settlement) { settlement };
         case (null) {
           return #err("Nothing to settle");
@@ -286,20 +308,20 @@ module {
       };
 
       if (settlement.tokens.size() == 0) {
-        _salesSettlements.delete(paymentaddress);
+        _salesSettlements.delete(paymentAddress);
         return #err("Nothing tokens to settle for");
       };
 
-      if (response.e8s >= settlement.price) {
+      if (balance >= settlement.price) {
         if (settlement.tokens.size() > availableTokens()) {
           // Issue refund if not enough NFTs available
           deps._Disburser.addDisbursement({
             to = settlement.buyer;
             fromSubaccount = settlement.subaccount;
-            amount = response.e8s - 10000;
+            amount = balance - 10000;
             tokenIndex = 0;
           });
-          _salesSettlements.delete(paymentaddress);
+          _salesSettlements.delete(paymentAddress);
 
           return #err("Not enough NFTs - a refund will be sent automatically very soon");
         };
@@ -312,12 +334,13 @@ module {
           tokens = tokens;
           seller = config.canister;
           price = settlement.price;
+          ledger = settlement.ledger;
           buyer = settlement.buyer;
           time = Time.now();
         });
         _soldIcp += settlement.price;
         _sold += tokens.size();
-        _salesSettlements.delete(paymentaddress);
+        _salesSettlements.delete(paymentAddress);
         let event : Root.IndefiniteEvent = {
           operation = "mint";
           details = [
@@ -333,7 +356,7 @@ module {
         ignore deps._Cap.insert(event);
         // Payout
         // remove total transaction fee from balance to be splitted
-        let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(config.salesDistribution.size()));
+        let bal : Nat64 = balance - (10000 * Nat64.fromNat(config.salesDistribution.size()));
 
         // disbursement sales
         for (f in config.salesDistribution.vals()) {
@@ -349,8 +372,8 @@ module {
       } else {
         // if the settlement expired and they still didnt send the full amount, we add them to failedSales
         if (settlement.expires < Time.now()) {
-          _failedSales.add((settlement.buyer, settlement.subaccount));
-          _salesSettlements.delete(paymentaddress);
+          _failedSales.add(settlement);
+          _salesSettlements.delete(paymentAddress);
 
           // add back to whitelist if one time only
           switch (settlement.whitelistName) {
@@ -376,10 +399,10 @@ module {
       // This is done by adding the await statement.
       // For every message the max cycles is reset
       label settleLoop while (true) {
-        switch (expiredSalesSettlements().keys().next()) {
-          case (?paymentAddress) {
+        switch (expiredSalesSettlements().entries().next()) {
+          case (?(paymentAddress, settlement)) {
             try {
-              ignore (await* retrieve(caller, paymentAddress));
+              ignore (await* retrieve(caller, paymentAddress, settlement.ledger));
             } catch (e) {
               break settleLoop;
             };
@@ -394,31 +417,42 @@ module {
         let last = _failedSales.removeLast();
         switch (last) {
           case (?failedSale) {
-            let subaccount = failedSale.1;
             try {
-              // check if subaccount holds icp
-              let response : Types.Tokens = await Ledger.account_balance({
-                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(config.canister, ?subaccount));
-              });
-              if (response.e8s > 10000) {
-                var bh = await Ledger.transfer({
-                  memo = 0;
-                  amount = { e8s = response.e8s - 10000 };
-                  fee = { e8s = 10000 };
-                  from_subaccount = ?subaccount;
-                  to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
-                    case (#ok(accountId)) {
-                      AviateAccountIdentifier.addHash(accountId);
-                    };
-                    case (#err(_)) {
-                      // this should never happen because account ids are always created from within the
-                      // canister which should guarantee that they are valid and we are able to decode them
-                      // to [Nat8]
-                      continue failedSalesLoop;
-                    };
+              // check if subaccount holds tokens
+              let ledgerActor = actor(Principal.toText(failedSale.ledger)) : ICRC1.Service;
+              let ledgerFee = await* _getLedgerFee(failedSale.ledger);
+
+              let balance = Nat64.fromNat(await ledgerActor.icrc1_balance_of({
+                owner = config.canister;
+                subaccount = ?Blob.fromArray(failedSale.subaccount);
+              }));
+
+              if (balance > ledgerFee) {
+                let buyerAccount : ICRC1.Account = switch (Account.fromText(failedSale.buyer)) {
+                  case (#ok(account)) account;
+                  case (#err(_)) {
+                    // this should never happen because payment accounts are always created from within the canister which should guarantee that they are valid
+                    continue failedSalesLoop;
                   };
+                };
+
+                var res = await ledgerActor.icrc1_transfer({
+                  memo = null;
+                  amount = Nat64.toNat(balance - ledgerFee);
+                  fee = ?Nat64.toNat(ledgerFee);
+                  from_subaccount = ?Blob.fromArray(failedSale.subaccount);
+                  to = buyerAccount;
                   created_at_time = null;
                 });
+
+                switch (res) {
+                  case (#Ok(bh)) {};
+                  case (#err(_)) {
+                    // if the transaction fails for some reason, we add it back to the Buffer
+                    _failedSales.add(failedSale);
+                    break failedSalesLoop;
+                  };
+                };
               };
             } catch (e) {
               // if the transaction fails for some reason, we add it back to the Buffer
@@ -440,15 +474,15 @@ module {
     };
 
     // queries
-    public func salesSettlements() : [(Types.AccountIdentifier, Types.Sale)] {
+    public func salesSettlements() : [(Types.Address, Types.SaleV3)] {
       Iter.toArray(_salesSettlements.entries());
     };
 
-    public func failedSales() : [(Types.AccountIdentifier, Types.SubAccount)] {
+    public func failedSales() : [Types.SaleV3] {
       Buffer.toArray(_failedSales);
     };
 
-    public func saleTransactions() : [Types.SaleTransaction] {
+    public func saleTransactions() : [Types.SaleTransactionV3] {
       Buffer.toArray(_saleTransactions);
     };
 
@@ -460,7 +494,7 @@ module {
       _totalToSell;
     };
 
-    public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
+    public func salesSettings(address : Types.Address) : Types.SaleSettingsV3 {
       var startTime = config.publicSaleStart;
       var endTime : Time.Time = 0;
 
@@ -480,9 +514,16 @@ module {
         case (_) {};
       };
 
+      let icpPriceInfoOpt = Array.find(config.salePrices, func(p : RootTypes.PriceInfo) : Bool {
+        p.ledger == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")
+      });
+      let icpPriceOpt = Option.map(icpPriceInfoOpt, func(p : RootTypes.PriceInfo) : Nat64 { p.price; });
+
       return {
-        price = getAddressPrice(address);
-        salePrice = config.salePrice;
+        price = getAddressPrice(address, Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"));
+        salePrice = Option.get(icpPriceOpt, 0 : Nat64);
+        prices = getAddressPrices(address);
+        salePrices = config.salePrices;
         remaining = availableTokens();
         sold = _sold;
         totalToSell = _totalToSell;
@@ -491,7 +532,7 @@ module {
         whitelistTime = config.publicSaleStart;
         whitelist = isWhitelisted(address);
         openEdition = openEdition;
-      } : Types.SaleSettings;
+      } : Types.SaleSettingsV3;
     };
 
     /*******************
@@ -515,9 +556,21 @@ module {
       Array.freeze(Array.init<Types.TokenIndex>(Nat64.toNat(qty), 0));
     };
 
-    // Set different price types here
-    func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {
-      // dutch auction
+    func getAddressPrice(address : Types.Address, ledger : Principal) : Nat64 {
+      let prices = getAddressPrices(address);
+      let priceInfoOpt = Array.find(prices, func(p : RootTypes.PriceInfo) : Bool {
+        p.ledger == ledger
+      });
+      switch (priceInfoOpt) {
+        case (?priceInfo) priceInfo.price;
+        case (null) {
+          Debug.trap("Price not found for ledger " # Principal.toText(ledger) # " and address " # address);
+        };
+      };
+    };
+
+    func getAddressPrices(address : Types.Address) : [RootTypes.PriceInfo] {
+      // dutch auction (only ICP ledger is supported for now)
       switch (config.dutchAuction) {
         case (?dutchAuction) {
           // dutch auction for everyone
@@ -528,7 +581,10 @@ module {
           let publicSale = dutchAuction.target == #publicSale and not isWhitelisted(address);
 
           if (everyone or whitelist or publicSale) {
-            return getCurrentDutchAuctionPrice(dutchAuction);
+            return [{
+              ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+              price = getCurrentDutchAuctionPrice(dutchAuction);
+            }];
           };
         };
         case (null) {};
@@ -541,12 +597,12 @@ module {
       // is always the first one.
       switch (getEligibleWhitelist(address, true)) {
         case (?whitelist) {
-          return whitelist.price;
+          return whitelist.prices;
         };
         case (_) {};
       };
 
-      return config.salePrice;
+      return config.salePrices;
     };
 
     func getCurrentDutchAuctionPrice(dutchAuction : RootTypes.DutchAuction) : Nat64 {
@@ -596,16 +652,16 @@ module {
       };
     };
 
-    func getWhitelistSpotId(whitelist : Types.Whitelist, address : Types.AccountIdentifier) : Types.WhitelistSpotId {
+    func getWhitelistSpotId(whitelist : Types.Whitelist, address : Types.Address) : Types.WhitelistSpotId {
       whitelist.name # ":" # address;
     };
 
-    func addWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
+    func addWhitelistSpot(whitelist : Types.Whitelist, address : Types.Address) {
       let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
       _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots + 1);
     };
 
-    func removeWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
+    func removeWhitelistSpot(whitelist : Types.Whitelist, address : Types.Address) {
       let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
       if (remainingSpots > 0) {
         _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots - 1);
@@ -615,7 +671,7 @@ module {
     };
 
     // get a whitelist that has started, hasn't expired, and hasn't been used by an address
-    func getEligibleWhitelist(address : Types.AccountIdentifier, allowNotStarted : Bool) : ?Types.Whitelist {
+    func getEligibleWhitelist(address : Types.Address, allowNotStarted : Bool) : ?Types.Whitelist {
       for (whitelist in config.whitelists.vals()) {
         let spotId = getWhitelistSpotId(whitelist, address);
         let remainingSpots = Option.get(_whitelistSpots.get(spotId), 0);
@@ -631,7 +687,7 @@ module {
     };
 
     // this method is time sensitive now and only returns true, iff the address is whitelist in the current slot
-    func isWhitelisted(address : Types.AccountIdentifier) : Bool {
+    func isWhitelisted(address : Types.Address) : Bool {
       Option.isSome(getEligibleWhitelist(address, false));
     };
 
@@ -639,12 +695,12 @@ module {
       deps._Tokens.mintCollection();
     };
 
-    func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
-      TrieMap.mapFilter<Types.AccountIdentifier, Types.Sale, Types.Sale>(
+    func expiredSalesSettlements() : TrieMap.TrieMap<Types.Address, Types.SaleV3> {
+      TrieMap.mapFilter<Types.Address, Types.SaleV3, Types.SaleV3>(
         _salesSettlements,
-        AID.equal,
-        AID.hash,
-        func(a : (Types.AccountIdentifier, Types.Sale)) : ?Types.Sale {
+        Text.equal,
+        Text.hash,
+        func(a : (Types.Address, Types.SaleV3)) : ?Types.SaleV3 {
           switch (a.1.expires < Time.now()) {
             case (true) {
               ?a.1;
@@ -655,6 +711,29 @@ module {
           };
         },
       );
+    };
+
+    func _isLedgerAllowed(ledger : Principal) : Bool {
+      Array.find(config.salePrices, func(p : RootTypes.PriceInfo) : Bool {
+        p.ledger == ledger
+      }) == null;
+    };
+
+
+    var _feeByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
+
+    func _getLedgerFee(ledger : Principal) : async* Nat64 {
+      switch (_feeByLedger.get(ledger)) {
+        case (?fee) {
+          fee;
+        };
+        case (null) {
+          let ledgerActor = actor(Principal.toText(ledger)) : ICRC1.Service;
+          let fee = Nat64.fromNat(await ledgerActor.icrc1_fee());
+          _feeByLedger.put(ledger, fee);
+          fee;
+        };
+      };
     };
   };
 };

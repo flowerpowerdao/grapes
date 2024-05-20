@@ -1,5 +1,3 @@
-import Ledger "canister:ledger";
-
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
@@ -19,6 +17,7 @@ import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
+import LedgerTypes "mo:ledger-types";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -207,7 +206,8 @@ module {
         };
       };
 
-      let response = await Ledger.account_balance({
+      let ledger = actor("ryjl3-tyaaa-aaaaa-aaaba-cai") : LedgerTypes.Service;
+      let response = await ledger.account_balance({
         account = addHash(fromPrincipal(config.canister, ?settlement.subaccount));
       });
 
@@ -472,10 +472,6 @@ module {
 
     public func pendingCronJobs() : Nat {
       unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
-    };
-
-    public func toAccountIdentifier(p : Text, sa : Nat) : Types.AccountIdentifier {
-      AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
     public func frontends() : [(Text, Types.Frontend)] {

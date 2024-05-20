@@ -1,5 +1,3 @@
-import Ledger "canister:ledger";
-
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Random "mo:base/Random";
@@ -9,6 +7,7 @@ import Principal "mo:base/Principal";
 
 import Encoding "mo:encoding/Binary";
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
+import LedgerTypes "mo:ledger-types";
 
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
@@ -62,7 +61,8 @@ module {
 
             try {
               curNonce := (curNonce + 1) % 1000;
-              var res = await Ledger.transfer({
+              let ledger = actor("ryjl3-tyaaa-aaaaa-aaaba-cai") : LedgerTypes.Service;
+              var res = await ledger.transfer({
                 to = switch (AviateAccountIdentifier.fromText(disbursement.to)) {
                   case (#ok(accountId)) {
                     AviateAccountIdentifier.addHash(accountId);

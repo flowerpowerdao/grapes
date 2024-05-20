@@ -1,8 +1,10 @@
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
+import ICRC1 "mo:icrc1-types";
 
 module {
   type AccountIdentifier = Text;
+  public type Address = Text; // Legacy account identifier or ICRC-1 account
 
   public type Duration = {
     #nanoseconds : Nat;
@@ -18,9 +20,14 @@ module {
     end : Time.Time;
   };
 
+  public type PriceInfo = {
+    ledger : Principal;
+    price : Nat64; // e8s
+  };
+
   public type Whitelist = {
     name : Text;
-    price : Nat64;
+    prices : [PriceInfo];
     addresses : [AccountIdentifier];
     oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
     startTime : Time.Time;
@@ -45,7 +52,7 @@ module {
       #supply: Nat; // fixed collection size
       #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')
     };
-    salePrice : Nat64; // e8s
+    salePrices : [PriceInfo];
     publicSaleStart : Time.Time;
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];

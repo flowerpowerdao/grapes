@@ -53,7 +53,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   /*********
   * TYPES *
   *********/
-  type AccountIdentifier = ExtCore.AccountIdentifier;
+  type Address = Types.Address;
   type SubAccount = ExtCore.SubAccount;
 
   type StableChunk = {
@@ -419,17 +419,17 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.enableSale(caller);
   };
 
-  public func reserve(address : SaleTypes.AccountIdentifier) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+  public shared ({ caller }) func reserve(address : Address, ledger : Principal) : async Result.Result<(Address, Nat64), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
-    _Sale.reserve(address);
+    _Sale.reserve(caller, address, ledger);
   };
 
-  public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+  public shared ({ caller }) func retrieve(paymentAddress : Address, ledger : Principal) : async Result.Result<(), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'reserve'
-    await* _Sale.retrieve(caller, paymentaddress);
+    await* _Sale.retrieve(caller, paymentAddress, ledger);
   };
 
   public shared ({ caller }) func cronSalesSettlements() : async () {
@@ -445,11 +445,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // queries
-  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
+  public query func salesSettlements() : async [(Address, SaleTypes.Sale)] {
     _Sale.salesSettlements();
   };
 
-  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
+  public query func failedSales() : async [SaleTypes.SaleV3] {
     _Sale.failedSales();
   };
 
@@ -457,7 +457,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.saleTransactions();
   };
 
-  public query func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
+  public query func salesSettings(address : Address) : async SaleTypes.SaleSettings {
     _Sale.salesSettings(address);
   };
 
@@ -551,10 +551,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       disbursements = _Disburser.pendingCronJobs();
       failedSettlements = _Marketplace.pendingCronJobs();
     };
-  };
-
-  public query func toAccountIdentifier(p : Text, sa : Nat) : async AccountIdentifier {
-    _Marketplace.toAccountIdentifier(p, sa);
   };
 
   // EXT
