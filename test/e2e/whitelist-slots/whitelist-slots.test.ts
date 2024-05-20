@@ -3,18 +3,19 @@ import { User } from '../user';
 import { buyFromSale } from '../utils';
 import { whitelistTier0, whitelistTier1, lucky } from '../well-known-users';
 import env from './env';
+import {Principal} from '@dfinity/principal';
 
 // slot 1
 describe('whitelist slot 1', () => {
   test('check price for non-whitelisted user', async () => {
     let user = new User;
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.salePrice);
   });
 
   test('check whitelist price', async () => {
     let user = whitelistTier0[0];
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier0Price);
   });
 
@@ -22,12 +23,12 @@ describe('whitelist slot 1', () => {
     let user = whitelistTier0[1];
     await user.mintICP(100_000_000_000n);
 
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier0Price);
 
     await buyFromSale(user);
 
-    settings = await user.mainActor.salesSettings(user.accountId);
+    settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.salePrice);
   });
 
@@ -35,7 +36,7 @@ describe('whitelist slot 1', () => {
     let user = lucky[2];
     await user.mintICP(100_000_000_000n);
 
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     // must be cheapest price
     expect(settings.price).toBe(env.whitelistTier0Price);
   });
@@ -45,21 +46,21 @@ describe('whitelist slot 1', () => {
     await user.mintICP(100_000_000_000n);
 
     // tier 1 price
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier0Price);
 
     await buyFromSale(user);
 
     // tier 2 price
-    settings = await user.mainActor.salesSettings(user.accountId);
+    settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier1Price);
   });
 
   test('try to buy after spot from slot 1 was used and slot 2 has not started yet', async () => {
     let user = lucky[3];
 
-    let settings = await user.mainActor.salesSettings(user.accountId);
-    let res = await user.mainActor.reserve(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
     expect(res).toHaveProperty('err');
   });
@@ -67,7 +68,7 @@ describe('whitelist slot 1', () => {
   test('user from slot 2 try to buy during slot 1', async () => {
     let user = whitelistTier1[0];
 
-    let res = await user.mainActor.reserve(user.accountId);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(res).toHaveProperty('err');
   });
 });
@@ -90,10 +91,10 @@ describe('whitelist slot 2', () => {
     await user.mintICP(100_000_000_000n);
 
     // should be sale price
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.salePrice);
 
-    let res = await user.mainActor.reserve(user.accountId);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(res).toHaveProperty('err');
   });
 
@@ -102,7 +103,7 @@ describe('whitelist slot 2', () => {
     await user.mintICP(100_000_000_000n);
 
     // should be tier 2 price
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier1Price);
 
     await buyFromSale(user);
@@ -113,14 +114,14 @@ describe('whitelist slot 2', () => {
     await user.mintICP(100_000_000_000n);
 
     // try to buy at tier 1 price
-    let res = await user.mainActor.reserve(user.accountId);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(res).toHaveProperty('ok');
 
     if ('ok' in res) {
       let paymentAddress = res.ok[0];
 
       await user.sendICP(paymentAddress, env.whitelistTier0Price);
-      let retrieveRes = await user.mainActor.retrieve(paymentAddress);
+      let retrieveRes = await user.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
     }
@@ -131,7 +132,7 @@ describe('whitelist slot 2', () => {
     await user.mintICP(100_000_000_000n);
 
     // should be tier 2 price
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     expect(settings.price).toBe(env.whitelistTier1Price);
 
     await buyFromSale(user);

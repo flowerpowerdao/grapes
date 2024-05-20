@@ -16,7 +16,7 @@ describe('multi asset collection', () => {
   });
 
   test('check metadata of each token', async () => {
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     for (let i = 0; i < settings.totalToSell; i++) {
       expect(await user.mainActor.metadata(tokenIdentifier(i))).toEqual({
         ok: {

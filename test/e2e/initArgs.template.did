@@ -3,7 +3,12 @@
   record {
     name = $name;
     sale = $sale;
-    salePrice = $salePrice;
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = $salePrice;
+      };
+    };
     publicSaleStart = $publicSaleStart;
     salesDistribution = vec {
       record { $beneficiary0; $salesDistribution0 };
@@ -35,7 +40,12 @@
     whitelists = vec {
       record {
         name = $whitelistTier0Name;
-        price = $whitelistTier0Price;
+        prices = vec {
+          record {
+            ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+            price = $whitelistTier0Price;
+          };
+        };
         addresses = $whitelistTier0Whitelist;
         oneTimeOnly = true;
         startTime = $whitelistSlot1_start;
@@ -43,7 +53,12 @@
       };
       record {
         name = $whitelistTier1Name;
-        price = $whitelistTier1Price;
+        prices = vec {
+          record {
+            ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+            price = $whitelistTier1Price;
+          };
+        };
         addresses = $whitelistTier1Whitelist;
         oneTimeOnly = true;
         startTime = $whitelistSlot2_start;

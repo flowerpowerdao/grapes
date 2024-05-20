@@ -3,7 +3,7 @@ import { expect } from "vitest";
 import { User } from "./user";
 
 import canisterIds from '../../.dfx/local/canister_ids.json';
-import { AccountIdentifier } from "@dfinity/nns";
+import { AccountIdentifier } from "@dfinity/ledger-icp";
 
 export function feeOf(amount: bigint, fee: bigint) {
   return amount * fee / 100_000n;
@@ -18,19 +18,19 @@ export function applyFees(amount: bigint, fees: bigint[]) {
 }
 
 export async function buyFromSale(user: User) {
-  let settings = await user.mainActor.salesSettings(user.accountId);
-  let res = await user.mainActor.reserve(user.accountId);
+  let settings = await user.mainActor.salesSettings(user.address);
+  let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
   expect(res).toHaveProperty('ok');
 
   if ('ok' in res) {
     let paymentAddress = res.ok[0];
     let paymentAmount = res.ok[1];
-    expect(paymentAddress.length).toBe(64);
+    expect(paymentAddress.length).toBeGreaterThanOrEqual(38);
     expect(paymentAmount).toBe(settings.price);
 
     await user.sendICP(paymentAddress, paymentAmount);
-    let retrieveRes = await user.mainActor.retrieve(paymentAddress);
+    let retrieveRes = await user.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(retrieveRes).toHaveProperty('ok');
   }
 }

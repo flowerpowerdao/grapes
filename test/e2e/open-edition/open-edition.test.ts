@@ -4,6 +4,7 @@ import { User } from '../user';
 import { buyFromSale, checkTokenCount, feeOf, toAccount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './env';
+import {Principal} from '@dfinity/principal';
 
 let count = 10;
 describe('open edition', () => {
@@ -29,8 +30,8 @@ describe('open edition', () => {
 
   test('try to buy when sale ended', async () => {
     let user = new User;
-    let settings = await user.mainActor.salesSettings(user.accountId);
-    let res = await user.mainActor.reserve(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(res).toHaveProperty('err');
     expect(res['err']).toContain('sale has ended');
   });

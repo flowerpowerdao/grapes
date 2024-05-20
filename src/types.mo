@@ -1,6 +1,5 @@
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
-import ICRC1 "mo:icrc1-types";
 
 module {
   type AccountIdentifier = Text;
@@ -28,7 +27,7 @@ module {
   public type Whitelist = {
     name : Text;
     prices : [PriceInfo];
-    addresses : [AccountIdentifier];
+    addresses : [Address];
     oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
     startTime : Time.Time;
     endTime : ?Time.Time;
@@ -54,13 +53,13 @@ module {
     };
     salePrices : [PriceInfo];
     publicSaleStart : Time.Time;
-    salesDistribution : [(AccountIdentifier, Nat64)];
+    salesDistribution : [(Address, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay : Duration;
-    airdrop : [AccountIdentifier];
+    airdrop : [Address];
     whitelists : [Whitelist]; // order from lower price to higher price
     dutchAuction: ?DutchAuction;
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
