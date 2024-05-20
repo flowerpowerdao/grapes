@@ -41,6 +41,10 @@ module {
 
     public func http_request(request : Types.HttpRequest) : Types.HttpResponse {
       let path = Iter.toArray(Text.tokens(request.url, #text("/")));
+
+      /**********************
+      * TOKEN INDEX LOOKUP *
+      **********************/
       switch (_getParam(request.url, "tokenid")) {
         case (?tokenid) {
           // start custom
@@ -69,6 +73,10 @@ module {
         };
         case (_) {};
       };
+
+      /**********************
+      * ASSET INDEX LOOKUP *
+      **********************/
       switch (_getParam(request.url, "asset")) {
         case (?atext) {
           switch (Utils.natFromText(atext)) {
@@ -140,7 +148,7 @@ module {
 
       var whitelistsText = "";
       for (whitelist in config.whitelists.vals()) {
-        whitelistsText #= whitelist.name # " " # _displayICP(Nat64.toNat(whitelist.price)) # "start: " # debug_show (whitelist.startTime) # ", end: " # debug_show (whitelist.endTime) # "; ";
+        whitelistsText #= whitelist.name # " " # _displayICP(Nat64.toNat(whitelist.price)) # ", start: " # debug_show (whitelist.startTime) # ", end: " # debug_show (whitelist.endTime) # "; ";
       };
 
       return {

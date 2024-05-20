@@ -179,26 +179,51 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // timers
-  func _setTimers() {
+  func _cancelTimers() {
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
+  };
+
+  func _setTimers() {
+    _cancelTimers();
 
     let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
+
+    // force run needed in case of failed cron jobs (when inProgress is stuck to true)
+    // allow force run every 15 minutes
+    let forceInterval = Utils.toNanos(#minutes(15));
+
+    var inProgress = false;
+    var lastCron = Time.now();
 
     _timerId := Timer.recurringTimer(
       #nanoseconds(timersInterval),
       func() : async () {
-        ignore cronSettlements();
-        ignore cronDisbursements();
-        ignore cronSalesSettlements();
-        ignore cronFailedSales();
+        if (inProgress and Time.now() < lastCron + forceInterval) {
+          return;
+        };
+        inProgress := true;
+        lastCron := Time.now();
+
+        try {
+          let settlementsPromise = cronSettlements();
+          let disbursementsPromise = cronDisbursements();
+          let salesSettlementsPromise = cronSalesSettlements();
+          let failedSalesPromise = cronFailedSales();
+
+          await settlementsPromise;
+          await disbursementsPromise;
+          await salesSettlementsPromise;
+          await failedSalesPromise;
+        } catch (e) {};
+
+        inProgress := false;
       },
     );
 
     if (Utils.toNanos(config.revealDelay) > 0 and not _Assets.isShuffled()) {
       let revealTime = config.publicSaleStart + Utils.toNanos(config.revealDelay);
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
-
       // add random delay up to 60 minutes
       let minute = 1_000_000_000 * 60;
       let randDelay = if (delay > 60 * minute) {
@@ -213,6 +238,16 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
         },
       );
     };
+  };
+
+  public shared ({ caller }) func setTimers() : async () {
+    assert (caller == init_minter);
+    _setTimers();
+  };
+
+  public shared ({ caller }) func cancelTimers() : async () {
+    assert (caller == init_minter);
+    _cancelTimers();
   };
 
   /*************
@@ -335,6 +370,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.addAssets(caller, assets);
+  };
+
+  public shared ({ caller }) func shuffleAssets() : async Bool {
+    assert (caller == init_minter);
+    await _Assets.shuffleAssets();
+    _Assets.isShuffled();
   };
 
   // Sale

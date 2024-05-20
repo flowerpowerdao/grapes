@@ -18,7 +18,7 @@ let dfxNetwork = network === 'local' || network === 'test' ? 'local' : 'ic';
 let initArgsFile = network === 'local' || network === 'test' ? 'initArgs.local.did' : 'initArgs.did';
 
 let mode = argv.mode || '';
-let modeArg = mode === 'reinstall' ? `--mode=${mode}` : '';
+let modeArg = mode === 'reinstall' ? `--mode=${mode}` : '--mode=auto';
 
 // skip prompt for local reinstall
 if (dfxNetwork === 'local' && mode === 'reinstall') {
@@ -37,7 +37,10 @@ let actor = getActor(network, identity);
 if (mode === 'reinstall') {
   console.log(chalk.yellow('REINSTALL MODE'));
 }
-console.log('Controller', identity.getPrincipal().toText());
+console.log(chalk.yellow(`Identity: ${identityName}`));
+console.log(chalk.yellow(`Controller: ${identity.getPrincipal().toText()}`));
+console.log(chalk.yellow(`Canister: ${nftCanisterName}`));
+console.log(chalk.yellow(`Network: ${dfxNetwork}`));
 
 let dirContent = fs.readdirSync(assetsDir);
 let files = dirContent.filter((item) => {
@@ -48,14 +51,6 @@ let filesByName = new Map(files.map((file) => {
   return [path.parse(file).name, file];
 }));
 
-// TODO: remove
-// populate with fake data for cherries
-let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
-for (let i = 0; i < assets.length; i++) {
-  filesByName.set(String(i + 1), `${i + 1}.svg`);
-  filesByName.set(String(i + 1) + '_thumbnail', `${i + 1}_thumbnail.png`);
-}
-filesByName.set('placeholder', 'placeholder.mp4');
 
 let run = async () => {
   deployNftCanister();
@@ -82,9 +77,11 @@ let getAssetUrl = (filename) => {
 }
 
 let deployNftCanister = () => {
-  console.log(chalk.green('Deploying nft canister...'));
-  console.log(`Using init args from ${initArgsFile}`);
-  execSync(`dfx deploy ${nftCanisterName} --no-wallet --argument "$(cat ${initArgsFile})" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
+  console.log(chalk.yellow(`Using init args from ${initArgsFile}`));
+  console.log(chalk.green('Building nft canister...'));
+  execSync(`dfx build ${nftCanisterName} --network ${dfxNetwork}`, execOptions);
+  console.log(chalk.green('Installing nft canister...'));
+  execSync(`dfx canister install ${nftCanisterName} --argument-file ${initArgsFile} --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 }
 
 // let deployAssetsCanister = () => {
@@ -128,7 +125,7 @@ let uploadAssetsMetadata = async () => {
   for (let chunk of chunks) {
     let metadataChunk = chunk.map(([index, metadata]) => {
       return {
-        name: String(index + 1),
+        name: String(index),
         payload: {
           ctype: '',
           data: [],
@@ -138,8 +135,8 @@ let uploadAssetsMetadata = async () => {
           ctype: 'application/json',
           data: [new TextEncoder().encode(JSON.stringify(metadata))],
         }],
-        payloadUrl: [getAssetUrl(String(index + 1))],
-        thumbnailUrl: [getAssetUrl(String(index + 1) + '_thumbnail')],
+        payloadUrl: [getAssetUrl(String(index))],
+        thumbnailUrl: [getAssetUrl(String(index) + '_thumbnail')],
       };
     });
 

@@ -265,7 +265,7 @@ module {
       let response : Types.Tokens = await Ledger.account_balance({
         account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
-            Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
+            AviateAccountIdentifier.addHash(accountId);
           };
           case (#err(_)) {
             // this should never happen because account ids are always created from within the
@@ -398,17 +398,17 @@ module {
             try {
               // check if subaccount holds icp
               let response : Types.Tokens = await Ledger.account_balance({
-                account = Blob.fromArray(AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(config.canister, ?subaccount)));
+                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(config.canister, ?subaccount));
               });
               if (response.e8s > 10000) {
                 var bh = await Ledger.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
-                  from_subaccount = ?Blob.fromArray(subaccount);
+                  from_subaccount = ?subaccount;
                   to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
                     case (#ok(accountId)) {
-                      Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
+                      AviateAccountIdentifier.addHash(accountId);
                     };
                     case (#err(_)) {
                       // this should never happen because account ids are always created from within the
