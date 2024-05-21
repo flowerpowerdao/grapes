@@ -70,8 +70,8 @@ export class User {
           subaccount: [decodeIcrcAccount(to).subaccount],
         },
         amount: amount,
-        memo: null,
-        fee: null,
+        memo: [],
+        fee: [],
         created_at_time: [BigInt(Date.now()) * 1_000_000n],
       });
       if ('Err' in res) {

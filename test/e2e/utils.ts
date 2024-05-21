@@ -3,7 +3,8 @@ import { expect } from "vitest";
 import { User } from "./user";
 
 import canisterIds from '../../.dfx/local/canister_ids.json';
-import { AccountIdentifier } from "@dfinity/ledger-icp";
+import { AccountIdentifier, SubAccount } from "@dfinity/ledger-icp";
+import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
 
 export function feeOf(amount: bigint, fee: bigint) {
   return amount * fee / 100_000n;
@@ -78,5 +79,13 @@ export let tokenIdentifier = (index) => {
 };
 
 export let toAccount = (address: string) => {
+  if (address.length !== 64) {
+    let account = decodeIcrcAccount(address);
+    let subaccount = account.subaccount ? SubAccount.fromBytes(Uint8Array.from(account.subaccount)) : undefined;
+    if (subaccount instanceof Error) {
+      throw new Error("Invalid subaccount. " + subaccount.message);
+    }
+    return { account: AccountIdentifier.fromPrincipal({principal: account.owner, subAccount: subaccount}).toNumbers() };
+  }
   return { account: AccountIdentifier.fromHex(address).toNumbers() };
 }

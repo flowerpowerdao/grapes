@@ -6,8 +6,8 @@ export default () => {
     test: true,
     restoreEnabled: false,
     timersInterval: 10, // seconds
-    beneficiary0: beneficiaries[0].accountId,
-    beneficiary1: beneficiaries[1].accountId,
+    beneficiary0: beneficiaries[0].address,
+    beneficiary1: beneficiaries[1].address,
     salesDistribution0: 45000n,
     salesDistribution1: 10125n,
     royalty0: 3375n,
@@ -51,14 +51,14 @@ export default () => {
     dutchAuctionIntervalPriceDrop: 500000000n, // drop 5 icp every interval
     dutchAuctionReservePrice: 500000000n, // reserve price is 5 icp
     dutchAuctionInterval: 60000000000n, // 1 minute
-    airdrop: airdrop.map(user => user.accountId),
+    airdrop: airdrop.map(user => user.address),
     // order from lower price to higher price
     whitelistTier0Name: 'ethflower',
     whitelistTier0Price: 350000000n,
-    whitelistTier0Whitelist: whitelistTier0.map(user => user.accountId),
+    whitelistTier0Whitelist: whitelistTier0.map(user => user.address),
     whitelistTier1Name: 'modclub',
     whitelistTier1Price: 500000000n,
-    whitelistTier1Whitelist: whitelistTier1.map(user => user.accountId),
+    whitelistTier1Whitelist: whitelistTier1.map(user => user.address),
 
     legacyPlaceholder: false,
   };
