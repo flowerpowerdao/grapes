@@ -184,7 +184,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_revealTimerId);
   };
 
-  func _setTimers() {
+  func _setTimers<system>() {
     _cancelTimers();
 
     let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
@@ -196,7 +196,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     var inProgress = false;
     var lastCron = Time.now();
 
-    _timerId := Timer.recurringTimer(
+    _timerId := Timer.recurringTimer<system>(
       #nanoseconds(timersInterval),
       func() : async () {
         if (inProgress and Time.now() < lastCron + forceInterval) {
@@ -231,7 +231,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       } else {
         0;
       };
-      _revealTimerId := Timer.setTimer(
+      _revealTimerId := Timer.setTimer<system>(
         #nanoseconds(delay + randDelay),
         func() : async () {
           await _Assets.shuffleAssets();
@@ -240,9 +240,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
   };
 
-  public shared ({ caller }) func setTimers() : async () {
+  public shared ({ caller }) func setTimers<system>() : async () {
     assert (caller == init_minter);
-    _setTimers();
+    _setTimers<system>();
   };
 
   public shared ({ caller }) func cancelTimers() : async () {
@@ -629,10 +629,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // cycles
-  public func acceptCycles() : async () {
+  public func acceptCycles<system>() : async () {
     canistergeekMonitor.collectMetrics();
     let available = Cycles.available();
-    let accepted = Cycles.accept(available);
+    let accepted = Cycles.accept<system>(available);
     assert (accepted == available);
   };
 

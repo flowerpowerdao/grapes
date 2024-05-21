@@ -1,20 +1,20 @@
 [dependencies]
-base = "https://github.com/dfinity/motoko-base#6557fbefc9a03afff8e0c84591ea78190eb6f723"
-"base-0.7.3" = "https://github.com/dfinity/motoko-base#aafcdee0c8328087aeed506e64aa2ff4ed329b47"
-array = "https://github.com/aviate-labs/array.mo#v0.2.0"
-crypto = "https://github.com/aviate-labs/crypto.mo#v0.1.1"
-encoding = "https://github.com/aviate-labs/encoding.mo#v0.3.2"
-hash = "https://github.com/aviate-labs/hash.mo#v0.1.0"
-accountid = "https://github.com/aviate-labs/principal.mo#v0.2.6"
-canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#v0.0.7"
-cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4"
+base = "0.11.1"
+"base-0.7.3" = "https://github.com/dfinity/motoko-base#aafcdee0c8328087aeed506e64aa2ff4ed329b47@aafcdee0c8328087aeed506e64aa2ff4ed329b47"
+array = "https://github.com/aviate-labs/array.mo#v0.2.0@863a668bcbb3c3799a62c36b2cba2c32d1fcc433"
+crypto = "https://github.com/aviate-labs/crypto.mo#v0.1.1@7a8e713bb1188bd4faff4f89b3de37b3c5500329"
+encoding = "https://github.com/aviate-labs/encoding.mo#v0.3.2@8e0fe1d8f5c2d284e77d719703c42e0e271839b1"
+hash = "https://github.com/aviate-labs/hash.mo#v0.1.0@3ee9fc46ba20c196e4913f3ed5aa12e26411e5c6"
+accountid = "https://github.com/aviate-labs/principal.mo#v0.2.6@c65c1da072cdc8066352ad29b56c39cde2af2a0b"
+canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#v0.0.7@6be013effbf761555cdda161df2c5e092aad3487"
+cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4@5f95a0dda5c6095f6ba290dd7b83ae421bdd485c"
 icrc1-types = "1.0.0"
 account = "1.0.1"
 ledger-types = "1.0.0"
 
 [dev-dependencies]
-test = "1.0.1"
-fuzz = "0.1.0"
+test = "2.0.0"
+fuzz = "0.2.1"
 
 [toolchain]
-moc = "0.8.4"
+moc = "0.11.1"

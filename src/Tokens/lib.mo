@@ -30,7 +30,9 @@ module {
         return null;
       };
       ?#v1({
-        tokenMetadata = Iter.toArray(_tokenMetadata.entries());
+        tokenMetadata = Iter.toArray(Iter.sort<(Types.TokenIndex, Types.Metadata)>(_tokenMetadata.entries(), func(a, b) {
+          return Nat32.compare(a.0, b.0);
+        }));
         owners = Iter.toArray(
           Iter.map<(Types.Address, Buffer.Buffer<Types.TokenIndex>), (Types.Address, [Types.TokenIndex])>(
             _owners.entries(),
@@ -39,7 +41,9 @@ module {
             },
           ),
         );
-        registry = Iter.toArray(_registry.entries());
+        registry = Iter.toArray(Iter.sort<(Types.TokenIndex, Types.Address)>(_registry.entries(), func(a, b) {
+          return Nat32.compare(a.0, b.0);
+        }));
         nextTokenId = _nextTokenId;
         supply = _supply;
       });

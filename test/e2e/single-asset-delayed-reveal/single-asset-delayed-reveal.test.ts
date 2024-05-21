@@ -9,10 +9,12 @@ describe('single asset with delayed reveal', () => {
   test('check getTokenToAssetMapping', async () => {
     let tokenToAsset = await user.mainActor.getTokenToAssetMapping();
 
-    tokenToAsset.forEach(([index, asset], i) => {
-      expect(index).toBe(i);
-      expect(asset).toBe('privat0');
-    });
+    tokenToAsset
+      .sort((a, b) => a[0] - b[0])
+      .forEach(([index, asset], i) => {
+        expect(index).toBe(i);
+        expect(asset).toBe('privat0');
+      });
   });
 
   test('check metadata of each token', async () => {

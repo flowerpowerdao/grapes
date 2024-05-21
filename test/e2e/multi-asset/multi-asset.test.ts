@@ -8,11 +8,12 @@ describe('multi asset collection', () => {
 
   test('check getTokenToAssetMapping', async () => {
     let tokenToAsset = await user.mainActor.getTokenToAssetMapping();
-
-    tokenToAsset.forEach(([index, asset], i) => {
-      expect(index).toBe(i);
-      expect(asset).toBe(`privat${i}`);
-    });
+    tokenToAsset
+      .sort((a, b) => a[0] - b[0])
+      .forEach(([index, asset], i) => {
+        expect(index).toBe(i);
+        expect(asset).toBe(`privat${i}`);
+      });
   });
 
   test('check metadata of each token', async () => {
