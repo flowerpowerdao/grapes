@@ -54,7 +54,7 @@ module {
     salePrices : [PriceInfo];
     publicSaleStart : Time.Time;
     salesDistribution : [(Address, Nat64)];
-    royalties : [(AccountIdentifier, Nat64)];
+    royalties : [(Address, Nat64)];
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled

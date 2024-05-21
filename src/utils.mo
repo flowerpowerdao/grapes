@@ -11,10 +11,12 @@ import Prim "mo:prim";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
-import Result "mo:base/Result";
-import Hex "mo:encoding/Hex";
 import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
+import Option "mo:base/Option";
 import BinaryEncoding "mo:encoding/Binary";
+import Account "mo:account";
+import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 
 import ExtCore "./toniq-labs/ext/Core";
 import Types "./types";
@@ -211,6 +213,18 @@ module {
       let temporaryValue = buffer.get(currentIndex);
       buffer.put(currentIndex, buffer.get(randomIndex));
       buffer.put(randomIndex, temporaryValue);
+    };
+  };
+
+  // if the account is in icrc format, convert it to aviate format
+  public func toAccountId(icrcAccountOrAccountId : Text) : Text {
+    if (Text.contains(icrcAccountOrAccountId, #char('-'))) {
+      let #ok(account) = Account.fromText(icrcAccountOrAccountId) else {
+        Debug.trap("account parsing error");
+      };
+      AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(account.owner, Option.map<Blob, [Nat8]>(account.subaccount, Blob.toArray)));
+    } else {
+      icrcAccountOrAccountId;
     };
   };
 };

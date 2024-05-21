@@ -243,7 +243,7 @@ module {
       for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
-          to = f.0;
+          to = Utils.toAccountId(f.0);
           fromSubaccount = settlement.subaccount;
           amount = _fee;
           tokenIndex = token;

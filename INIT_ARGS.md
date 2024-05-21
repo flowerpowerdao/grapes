@@ -73,8 +73,8 @@ salesDistribution = vec {
 Example:
 ```candid
 salesDistribution = vec {
-  record { "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed"; 55000 }; // 55%
-  record { "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81"; 45000 }; // 45%
+  record { "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae"; 55000 }; // 55%
+  record { "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe"; 45000 }; // 45%
 };
 ```
 
@@ -86,8 +86,8 @@ Typically, total <= 10%
 Example:
 ```candid
 royalties = vec {
-  record { "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed"; 500 }; // 0.5%
-  record { "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81"; 300 }; // 0.3%
+  record { "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae"; 500 }; // 0.5%
+  record { "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe"; 300 }; // 0.3%
 };
 ```
 
@@ -135,8 +135,8 @@ whitelists = vec {
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000; // can be omitted
     addresses = vec {
-      "da1fae1e25a417ab70953983a0c83ae5d7ee68ea83b1ac7b291246a29c87cc04";
-      "d29028c05d4b3a4e54b2c9040dd6d5acf8d79308b28344898729a0de0a52b241";
+      "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae";
+      "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe";
       // ...
     };
   };
@@ -147,8 +147,8 @@ whitelists = vec {
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000;
     addresses = vec {
-      "b35858170c410ce65ae3dc9d36298766aa36d287854fe43dcb65998f19bc5881";
-      "68b9a81e80a707742e8639d92e69e629734c1bd7da330a7bef67247f80ea72dc";
+      "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae";
+      "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe";
       // ...
     };
   };

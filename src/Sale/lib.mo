@@ -42,6 +42,7 @@ module {
     var _failedSales = Buffer.Buffer<Types.SaleV3>(0);
     var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
     var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.RemainingSpots>(Text.equal, Text.hash);
+    var _soldByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
     var _soldIcp = 0 : Nat64;
     var _sold = 0 : Nat;
     var _totalToSell = 0 : Nat;
@@ -318,7 +319,7 @@ module {
           deps._Disburser.addDisbursement({
             to = settlement.buyer;
             fromSubaccount = settlement.subaccount;
-            amount = balance - 10000;
+            amount = balance - ledgerFee;
             tokenIndex = 0;
           });
           _salesSettlements.delete(paymentAddress);
@@ -327,9 +328,12 @@ module {
         };
 
         var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
-        for (a in tokens.vals()) {
-          deps._Tokens.transferTokenToUser(a, settlement.buyer);
+
+        // transfer tokens to buyer
+        for (token in tokens.vals()) {
+          deps._Tokens.transferTokenToUser(token, settlement.buyer);
         };
+
         _saleTransactions.add({
           tokens = tokens;
           seller = config.canister;
@@ -338,7 +342,10 @@ module {
           buyer = settlement.buyer;
           time = Time.now();
         });
-        _soldIcp += settlement.price;
+        _soldByLedger.put(settlement.ledger, Option.get<Nat64>(_soldByLedger.get(settlement.ledger), 0 : Nat64) + settlement.price);
+        if (settlement.ledger == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")) {
+          _soldIcp += settlement.price;
+        };
         _sold += tokens.size();
         _salesSettlements.delete(paymentAddress);
         let event : Root.IndefiniteEvent = {
@@ -346,7 +353,7 @@ module {
           details = [
             ("to", #Text(settlement.buyer)),
             ("price_decimals", #U64(8)),
-            ("price_currency", #Text("ICP")),
+            ("price_currency", #Text(Principal.toText(ledger))),
             ("price", #U64(settlement.price)),
             // there can only be one token in tokens due to the reserve function
             ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], config.canister))),
@@ -356,13 +363,13 @@ module {
         ignore deps._Cap.insert(event);
         // Payout
         // remove total transaction fee from balance to be splitted
-        let bal : Nat64 = balance - (10000 * Nat64.fromNat(config.salesDistribution.size()));
+        let bal : Nat64 = balance - (ledgerFee * Nat64.fromNat(config.salesDistribution.size()));
 
         // disbursement sales
         for (f in config.salesDistribution.vals()) {
           var _fee : Nat64 = bal * f.1 / 100000;
           deps._Disburser.addDisbursement({
-            to = f.0;
+            to = Utils.toAccountId(f.0);
             fromSubaccount = settlement.subaccount;
             amount = _fee;
             tokenIndex = 0;
