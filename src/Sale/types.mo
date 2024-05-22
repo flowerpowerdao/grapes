@@ -109,7 +109,7 @@ module {
     price : Nat64;
     ledger : Principal;
     subaccount : SubAccount;
-    buyer : Address;
+    buyer : AccountIdentifier;
     expires : Time;
     whitelistName: ?Text;
   };
@@ -119,7 +119,7 @@ module {
     seller : Principal;
     price : Nat64;
     ledger : Principal;
-    buyer : Address;
+    buyer : AccountIdentifier;
     time : Time;
   };
 

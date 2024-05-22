@@ -2,7 +2,7 @@ import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 
 module {
-  type AccountIdentifier = Text;
+  public type AccountIdentifier = Text;
   public type Address = Text; // Legacy account identifier or ICRC-1 account
 
   public type Duration = {
@@ -27,7 +27,7 @@ module {
   public type Whitelist = {
     name : Text;
     prices : [PriceInfo];
-    addresses : [Address];
+    addresses : [AccountIdentifier];
     oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
     startTime : Time.Time;
     endTime : ?Time.Time;
@@ -59,7 +59,7 @@ module {
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay : Duration;
-    airdrop : [Address];
+    airdrop : [AccountIdentifier];
     whitelists : [Whitelist]; // order from lower price to higher price
     dutchAuction: ?DutchAuction;
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same

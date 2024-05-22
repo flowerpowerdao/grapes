@@ -1,10 +1,7 @@
 import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
-import List "mo:base/List";
 import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
-import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
@@ -13,8 +10,7 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Buffer "mo:base/Buffer";
 
-import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
-import Encoding "mo:encoding/Binary";
+import { fromPrincipal; addHash; } "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
 import LedgerTypes "mo:ledger-types";

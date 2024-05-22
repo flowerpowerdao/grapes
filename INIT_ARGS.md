@@ -10,7 +10,12 @@ Customize `initArgs.did` before you deploy the canister.
   record {
     name = "Collection Name";
     sale = variant { supply = 10_000 };
-    salePrice = 700_000_000; // 7 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 700_000_000; // 7 ICP
+      };
+    };
     publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
     royalties = vec {};
@@ -46,7 +51,13 @@ sale = variant {
 
 ## Sale price
 ```candid
-salePrice = 700_000_000; // 7 ICP
+salePrices = vec {
+  record {
+    ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    price = 700_000_000; // 7 ICP
+  };
+  // other ledgers...
+};
 ```
 
 ## Public sale start
@@ -130,25 +141,35 @@ Place the nearest and cheapest whiteslist first.
 whitelists = vec {
   record {
     name = "ethflower";
-    price = 350000000; // 3.5 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 350000000; // 3.5 ICP
+      };
+    };
     oneTimeOnly = true; // whitelist addresses are removed after purchase
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000; // can be omitted
     addresses = vec {
-      "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae";
-      "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe";
+      "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a";
+      "a6da832e6f11f4848c6a533f05f3f1c8ed20e948503931a380523718fb215887";
       // ...
     };
   };
   record {
     name = "modclub";
-    price = 500000000; // 5 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 500000000; // 5 ICP
+      };
+    };
     oneTimeOnly = false;
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000;
     addresses = vec {
-      "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae";
-      "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe";
+      "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a";
+      "a6da832e6f11f4848c6a533f05f3f1c8ed20e948503931a380523718fb215887";
       // ...
     };
   };

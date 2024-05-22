@@ -3,7 +3,6 @@ import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
@@ -15,11 +14,9 @@ import Buffer "mo:base/Buffer";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 
-import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
 import Account "mo:account";
-import LedgerTypes "mo:ledger-types";
 import ICRC1 "mo:icrc1-types";
 
 import Types "types";
@@ -270,7 +267,7 @@ module {
       switch (getEligibleWhitelist(address, false)) {
         case (?whitelist) {
           if (whitelist.oneTimeOnly) {
-            removeWhitelistSpot(whitelist, address);
+            removeWhitelistSpot(whitelist, Utils.toAccountId(address));
           };
         };
         case (null) {};
@@ -331,7 +328,7 @@ module {
 
         // transfer tokens to buyer
         for (token in tokens.vals()) {
-          deps._Tokens.transferTokenToUser(token, settlement.buyer);
+          deps._Tokens.transferTokenToUser(token, Utils.toAccountId(settlement.buyer));
         };
 
         _saleTransactions.add({
@@ -353,7 +350,7 @@ module {
           details = [
             ("to", #Text(settlement.buyer)),
             ("price_decimals", #U64(8)),
-            ("price_currency", #Text(Principal.toText(ledger))),
+            ("price_canister", #Principal(ledger)),
             ("price", #U64(settlement.price)),
             // there can only be one token in tokens due to the reserve function
             ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], config.canister))),
@@ -387,7 +384,7 @@ module {
             case (?whitelistName) {
               for (whitelist in config.whitelists.vals()) {
                 if (whitelist.name == whitelistName and whitelist.oneTimeOnly) {
-                  addWhitelistSpot(whitelist, settlement.buyer);
+                  addWhitelistSpot(whitelist, Utils.toAccountId(settlement.buyer));
                 };
               };
             };
@@ -659,28 +656,30 @@ module {
       };
     };
 
-    func getWhitelistSpotId(whitelist : Types.Whitelist, address : Types.Address) : Types.WhitelistSpotId {
-      whitelist.name # ":" # address;
+    func getWhitelistSpotId(whitelist : Types.Whitelist, accountId : Types.AccountIdentifier) : Types.WhitelistSpotId {
+      whitelist.name # ":" # accountId;
     };
 
-    func addWhitelistSpot(whitelist : Types.Whitelist, address : Types.Address) {
-      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
-      _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots + 1);
+    func addWhitelistSpot(whitelist : Types.Whitelist, accountId : Types.AccountIdentifier) {
+      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, accountId)), 0);
+      _whitelistSpots.put(getWhitelistSpotId(whitelist, accountId), remainingSpots + 1);
     };
 
-    func removeWhitelistSpot(whitelist : Types.Whitelist, address : Types.Address) {
-      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
+    func removeWhitelistSpot(whitelist : Types.Whitelist, accountId : Types.AccountIdentifier) {
+      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, accountId)), 0);
       if (remainingSpots > 0) {
-        _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots - 1);
+        _whitelistSpots.put(getWhitelistSpotId(whitelist, accountId), remainingSpots - 1);
       } else {
-        _whitelistSpots.delete(getWhitelistSpotId(whitelist, address));
+        _whitelistSpots.delete(getWhitelistSpotId(whitelist, accountId));
       };
     };
 
     // get a whitelist that has started, hasn't expired, and hasn't been used by an address
     func getEligibleWhitelist(address : Types.Address, allowNotStarted : Bool) : ?Types.Whitelist {
+      let accountId = Utils.toAccountId(address);
+
       for (whitelist in config.whitelists.vals()) {
-        let spotId = getWhitelistSpotId(whitelist, address);
+        let spotId = getWhitelistSpotId(whitelist, accountId);
         let remainingSpots = Option.get(_whitelistSpots.get(spotId), 0);
         let whitelistStarted = Time.now() >= whitelist.startTime;
         let endTime = Option.get(whitelist.endTime, 0);

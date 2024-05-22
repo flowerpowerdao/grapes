@@ -6,6 +6,12 @@ new HttpAgent({ host: 'http://127.0.0.1:4943' }).fetchRootKey().then((rk) => {
   rootKey = rk;
 });
 
+setInterval(() => {
+  new HttpAgent({host: 'http://127.0.0.1:4943'}).fetchRootKey().then((rk) => {
+    rootKey = rk;
+  });
+}, 1000 * 60); // 1 minute
+
 export let createAgent = (identity?: Secp256k1KeyIdentity) => {
 	let agent = new HttpAgent({
 		host: 'http://127.0.0.1:4943',

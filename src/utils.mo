@@ -216,7 +216,7 @@ module {
     };
   };
 
-  // if the account is in icrc format, convert it to aviate format
+  // if the account is in ICRC-1 textual format, convert it to account id
   public func toAccountId(icrcAccountOrAccountId : Text) : Text {
     if (Text.contains(icrcAccountOrAccountId, #char('-'))) {
       let #ok(account) = Account.fromText(icrcAccountOrAccountId) else {

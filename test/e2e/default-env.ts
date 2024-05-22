@@ -51,14 +51,14 @@ export default () => {
     dutchAuctionIntervalPriceDrop: 500000000n, // drop 5 icp every interval
     dutchAuctionReservePrice: 500000000n, // reserve price is 5 icp
     dutchAuctionInterval: 60000000000n, // 1 minute
-    airdrop: airdrop.map(user => user.address),
+    airdrop: airdrop.map(user => user.accountId),
     // order from lower price to higher price
     whitelistTier0Name: 'ethflower',
     whitelistTier0Price: 350000000n,
-    whitelistTier0Whitelist: whitelistTier0.map(user => user.address),
+    whitelistTier0Whitelist: whitelistTier0.map(user => user.accountId),
     whitelistTier1Name: 'modclub',
     whitelistTier1Price: 500000000n,
-    whitelistTier1Whitelist: whitelistTier1.map(user => user.address),
+    whitelistTier1Whitelist: whitelistTier1.map(user => user.accountId),
 
     legacyPlaceholder: false,
   };
