@@ -33,7 +33,7 @@ describe('public sale', () => {
       expect(paymentAmount).toBe(settings.price);
 
       await user.sendICP(paymentAddress, paymentAmount - 1n);
-      let retrieveRes = await user.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+      let retrieveRes = await user.mainActor.retrieve(paymentAddress);
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
     }

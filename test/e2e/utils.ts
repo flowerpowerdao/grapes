@@ -31,7 +31,7 @@ export async function buyFromSale(user: User) {
     expect(paymentAmount).toBe(settings.price);
 
     await user.sendICP(paymentAddress, paymentAmount);
-    let retrieveRes = await user.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+    let retrieveRes = await user.mainActor.retrieve(paymentAddress);
     expect(retrieveRes).toHaveProperty('ok');
   }
 }

@@ -104,12 +104,13 @@ module {
     openEdition : Bool;
   };
 
+  // V3
   public type SaleV3 = {
     tokens : [TokenIndex];
     price : Nat64;
     ledger : Principal;
     subaccount : SubAccount;
-    buyer : AccountIdentifier;
+    buyer : Address;
     expires : Time;
     whitelistName: ?Text;
   };
@@ -119,7 +120,7 @@ module {
     seller : Principal;
     price : Nat64;
     ledger : Principal;
-    buyer : AccountIdentifier;
+    buyer : Address;
     time : Time;
   };
 

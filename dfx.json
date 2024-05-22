@@ -6,10 +6,7 @@
       "main": "src/main.mo",
       "declarations": {
         "output": "declarations/main"
-      },
-      "dependencies": [
-        "ledger"
-      ]
+      }
     },
     "ledger": {
       "type": "custom",
@@ -28,10 +25,7 @@
     },
     "production": {
       "type": "motoko",
-      "main": "src/main.mo",
-      "dependencies": [
-        "ledger"
-      ]
+      "main": "src/main.mo"
     },
     "assets": {
       "type": "assets",

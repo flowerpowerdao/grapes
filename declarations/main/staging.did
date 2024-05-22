@@ -203,9 +203,12 @@ type StableChunk__3 =
      };
     v2_chunk: record {transactionChunk: vec TransactionV2;};
   };
-type StableChunk__2 = opt
-                       variant {
-                         v1: record {disbursements: vec Disbursement;};};
+type StableChunk__2 = 
+ opt
+  variant {
+    v1: record {disbursements: vec Disbursement;};
+    v2: record {disbursements: vec DisbursementV2;};
+  };
 type StableChunk__1 = 
  opt
   variant {
@@ -256,7 +259,7 @@ type Settlement =
  };
 type SaleV3 = 
  record {
-   buyer: Address__1;
+   buyer: AccountIdentifier__4;
    expires: Time__2;
    ledger: principal;
    price: nat64;
@@ -330,7 +333,7 @@ type Result_5 =
  variant {
    err: text;
    ok: record {
-         Address;
+         Address__1;
          nat64;
        };
  };
@@ -456,7 +459,7 @@ type InitArgs =
    restoreEnabled: opt bool;
    revealDelay: Duration;
    royalties: vec record {
-                    AccountIdentifier;
+                    Address;
                     nat64;
                   };
    sale: variant {
@@ -465,7 +468,7 @@ type InitArgs =
          };
    salePrices: vec PriceInfo;
    salesDistribution: vec record {
-                            AccountIdentifier;
+                            Address;
                             nat64;
                           };
    singleAssetCollection: opt bool;
@@ -588,6 +591,14 @@ type Duration =
    none;
    seconds: nat;
  };
+type DisbursementV2 = 
+ record {
+   amount: nat64;
+   fromSubaccount: SubAccount__2;
+   ledger: principal;
+   to: Address__2;
+   tokenIndex: TokenIndex__3;
+ };
 type Disbursement = 
  record {
    amount: nat64;
@@ -693,10 +704,12 @@ type Canister =
                            text;
                            Frontend;
                          });
+   /// * Returns canister information based on passed parameters.
+   ///     * Called from browser.
    getCanistergeekInformation: (GetInformationRequest) ->
     (GetInformationResponse) query;
    getChunkCount: (nat) -> (nat) query;
-   getDisbursements: () -> (vec Disbursement) query;
+   getDisbursements: () -> (vec DisbursementV2) query;
    getMinter: () -> (principal) query;
    getRegistry: () -> (vec record {
                              TokenIndex;
@@ -730,13 +743,13 @@ type Canister =
        disbursements: nat;
        failedSettlements: nat;
      }) query;
-   reserve: (Address, principal) -> (Result_5);
+   reserve: (Address__1, principal) -> (Result_5);
    restoreChunk: (StableChunk) -> ();
-   retrieve: (Address, principal) -> (Result_4);
+   retrieve: (Address__1) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
-   salesSettings: (Address) -> (SaleSettings) query;
+   salesSettings: (Address__1) -> (SaleSettings) query;
    salesSettlements: () -> (vec record {
-                                  Address;
+                                  Address__1;
                                   Sale;
                                 }) query;
    setTimers: () -> ();
@@ -757,6 +770,8 @@ type Canister =
    transactions: () -> (vec TransactionV2) query;
    transactionsPaged: (nat, nat) -> (vec Transaction, nat) query;
    transfer: (TransferRequest) -> (TransferResponse);
+   /// * Updates canister information based on passed parameters at current time.
+   ///     * Called from browser or any canister "update" method.
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
    updateThumb: (text, File) -> (opt nat);
  };
@@ -782,6 +797,7 @@ type AssetV2 =
    thumbnail: opt File;
    thumbnailUrl: opt text;
  };
+type Address__2 = text;
 type Address__1 = text;
 type Address = text;
 type AccountIdentifier__6 = text;

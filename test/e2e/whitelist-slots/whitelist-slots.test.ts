@@ -121,7 +121,7 @@ describe('whitelist slot 2', () => {
       let paymentAddress = res.ok[0];
 
       await user.sendICP(paymentAddress, env.whitelistTier0Price);
-      let retrieveRes = await user.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+      let retrieveRes = await user.mainActor.retrieve(paymentAddress);
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
     }

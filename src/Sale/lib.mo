@@ -276,13 +276,14 @@ module {
       #ok((paymentAddress, price));
     };
 
-    public func retrieve(caller : Principal, paymentAddress : Types.Address, ledger : Principal) : async* Result.Result<(), Text> {
-      if (Option.isNull(_salesSettlements.get(paymentAddress))) {
-        return #err("Nothing to settle");
+    public func retrieve(caller : Principal, paymentAddress : Types.Address) : async* Result.Result<(), Text> {
+      var settlement = switch (_salesSettlements.get(paymentAddress)) {
+        case (?settlement) { settlement };
+        case (null) {
+          return #err("Nothing to settle");
+        };
       };
-      if (_isLedgerAllowed(ledger)) {
-        return #err("This ledger is not allowed");
-      };
+      var ledger = settlement.ledger;
 
       let paymentAccount : ICRC1.Account = switch (Account.fromText(paymentAddress)) {
         case (#ok(account)) account;
@@ -298,12 +299,13 @@ module {
       let balance = Nat64.fromNat(await ledgerActor.icrc1_balance_of(paymentAccount));
 
       // because of the await above, we check again if there is a settlement available for the paymentAddress
-      let settlement = switch (_salesSettlements.get(paymentAddress)) {
+      settlement := switch (_salesSettlements.get(paymentAddress)) {
         case (?settlement) { settlement };
         case (null) {
           return #err("Nothing to settle");
         };
       };
+      ledger := settlement.ledger;
 
       if (settlement.tokens.size() == 0) {
         _salesSettlements.delete(paymentAddress);
@@ -314,6 +316,7 @@ module {
         if (settlement.tokens.size() > availableTokens()) {
           // Issue refund if not enough NFTs available
           deps._Disburser.addDisbursement({
+            ledger = ledger;
             to = settlement.buyer;
             fromSubaccount = settlement.subaccount;
             amount = balance - ledgerFee;
@@ -366,7 +369,8 @@ module {
         for (f in config.salesDistribution.vals()) {
           var _fee : Nat64 = bal * f.1 / 100000;
           deps._Disburser.addDisbursement({
-            to = Utils.toAccountId(f.0);
+            ledger = ledger;
+            to = f.0;
             fromSubaccount = settlement.subaccount;
             amount = _fee;
             tokenIndex = 0;
@@ -406,7 +410,7 @@ module {
         switch (expiredSalesSettlements().entries().next()) {
           case (?(paymentAddress, settlement)) {
             try {
-              ignore (await* retrieve(caller, paymentAddress, settlement.ledger));
+              ignore (await* retrieve(caller, paymentAddress));
             } catch (e) {
               break settleLoop;
             };
@@ -451,7 +455,7 @@ module {
 
                 switch (res) {
                   case (#Ok(bh)) {};
-                  case (#err(_)) {
+                  case (#Err(_)) {
                     // if the transaction fails for some reason, we add it back to the Buffer
                     _failedSales.add(failedSale);
                     break failedSalesLoop;
@@ -725,8 +729,7 @@ module {
       }) == null;
     };
 
-
-    var _feeByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
+    let _feeByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
 
     func _getLedgerFee(ledger : Principal) : async* Nat64 {
       switch (_feeByLedger.get(ledger)) {

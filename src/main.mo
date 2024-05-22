@@ -290,7 +290,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   let _Disburser = Disburser.Factory(config);
 
   // queries
-  public query func getDisbursements() : async [DisburserTypes.Disbursement] {
+  public query func getDisbursements() : async [DisburserTypes.DisbursementV2] {
     _Disburser.getDisbursements();
   };
 
@@ -425,11 +425,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.reserve(caller, address, ledger);
   };
 
-  public shared ({ caller }) func retrieve(paymentAddress : Address, ledger : Principal) : async Result.Result<(), Text> {
+  public shared ({ caller }) func retrieve(paymentAddress : Address) : async Result.Result<(), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'reserve'
-    await* _Sale.retrieve(caller, paymentAddress, ledger);
+    await* _Sale.retrieve(caller, paymentAddress);
   };
 
   public shared ({ caller }) func cronSalesSettlements() : async () {

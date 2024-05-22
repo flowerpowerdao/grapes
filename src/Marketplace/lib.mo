@@ -239,6 +239,7 @@ module {
       for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
+          ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
           to = Utils.toAccountId(f.0);
           fromSubaccount = settlement.subaccount;
           amount = _fee;
@@ -251,6 +252,7 @@ module {
       let sellerFrontend = getFrontend(settlement.sellerFrontend);
       let sellerFrontendFee = bal * sellerFrontend.fee / 100000;
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = sellerFrontend.accountIdentifier;
         fromSubaccount = settlement.subaccount;
         amount = sellerFrontendFee;
@@ -262,6 +264,7 @@ module {
       let buyerFrontend = getFrontend(settlement.buyerFrontend);
       let buyerFrontendFee = bal * buyerFrontend.fee / 100000;
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = buyerFrontend.accountIdentifier;
         fromSubaccount = settlement.subaccount;
         amount = buyerFrontendFee;
@@ -271,6 +274,7 @@ module {
 
       // disbursement to seller
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = tokenOwner;
         fromSubaccount = settlement.subaccount;
         amount = rem;

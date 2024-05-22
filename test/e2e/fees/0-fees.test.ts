@@ -44,7 +44,7 @@ describe('sale and royalty fees', () => {
       expect(paymentAmount).toBe(settings.price);
 
       await seller.sendICP(paymentAddress, paymentAmount);
-      let retrieveRes = await seller.mainActor.retrieve(paymentAddress, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
+      let retrieveRes = await seller.mainActor.retrieve(paymentAddress);
       expect(retrieveRes).toHaveProperty('ok');
     }
   });

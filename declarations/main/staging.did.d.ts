@@ -11,6 +11,7 @@ export type AccountIdentifier__5 = string;
 export type AccountIdentifier__6 = string;
 export type Address = string;
 export type Address__1 = string;
+export type Address__2 = string;
 export interface AssetV2 {
   'thumbnail' : [] | [File],
   'payloadUrl' : [] | [string],
@@ -51,7 +52,7 @@ export interface Canister {
     GetInformationResponse
   >,
   'getChunkCount' : ActorMethod<[bigint], bigint>,
-  'getDisbursements' : ActorMethod<[], Array<Disbursement>>,
+  'getDisbursements' : ActorMethod<[], Array<DisbursementV2>>,
   'getMinter' : ActorMethod<[], Principal>,
   'getRegistry' : ActorMethod<[], Array<[TokenIndex, AccountIdentifier__3]>>,
   'getTokenToAssetMapping' : ActorMethod<[], Array<[TokenIndex, string]>>,
@@ -81,12 +82,12 @@ export interface Canister {
     [],
     { 'failedSettlements' : bigint, 'disbursements' : bigint }
   >,
-  'reserve' : ActorMethod<[Address, Principal], Result_5>,
+  'reserve' : ActorMethod<[Address__1, Principal], Result_5>,
   'restoreChunk' : ActorMethod<[StableChunk], undefined>,
-  'retrieve' : ActorMethod<[Address, Principal], Result_4>,
+  'retrieve' : ActorMethod<[Address__1], Result_4>,
   'saleTransactions' : ActorMethod<[], Array<SaleTransaction>>,
-  'salesSettings' : ActorMethod<[Address], SaleSettings>,
-  'salesSettlements' : ActorMethod<[], Array<[Address, Sale]>>,
+  'salesSettings' : ActorMethod<[Address__1], SaleSettings>,
+  'salesSettlements' : ActorMethod<[], Array<[Address__1, Sale]>>,
   'setTimers' : ActorMethod<[], undefined>,
   'settle' : ActorMethod<[TokenIdentifier__1], Result_3>,
   'settlements' : ActorMethod<
@@ -162,6 +163,13 @@ export interface Disbursement {
   'to' : AccountIdentifier__5,
   'tokenIndex' : TokenIndex__3,
   'fromSubaccount' : SubAccount__2,
+  'amount' : bigint,
+}
+export interface DisbursementV2 {
+  'to' : Address__2,
+  'tokenIndex' : TokenIndex__3,
+  'fromSubaccount' : SubAccount__2,
+  'ledger' : Principal,
   'amount' : bigint,
 }
 export type Duration = { 'nanoseconds' : bigint } |
@@ -270,12 +278,12 @@ export interface InitArgs {
   'restoreEnabled' : [] | [boolean],
   'revealDelay' : Duration,
   'airdrop' : Array<AccountIdentifier>,
-  'royalties' : Array<[AccountIdentifier, bigint]>,
+  'royalties' : Array<[Address, bigint]>,
   'salePrices' : Array<PriceInfo>,
   'marketDelay' : [] | [Duration],
   'singleAssetCollection' : [] | [boolean],
   'publicSaleStart' : Time,
-  'salesDistribution' : Array<[AccountIdentifier, bigint]>,
+  'salesDistribution' : Array<[Address, bigint]>,
 }
 export interface ListRequest {
   'token' : TokenIdentifier__1,
@@ -345,7 +353,7 @@ export type Result_3 = { 'ok' : null } |
   { 'err' : CommonError__1 };
 export type Result_4 = { 'ok' : null } |
   { 'err' : string };
-export type Result_5 = { 'ok' : [Address, bigint] } |
+export type Result_5 = { 'ok' : [Address__1, bigint] } |
   { 'err' : string };
 export type Result_6 = { 'ok' : Metadata__1 } |
   { 'err' : CommonError };
@@ -396,7 +404,7 @@ export interface SaleV3 {
   'whitelistName' : [] | [string],
   'tokens' : Uint32Array | number[],
   'ledger' : Principal,
-  'buyer' : Address__1,
+  'buyer' : AccountIdentifier__4,
   'price' : bigint,
 }
 export interface Settlement {
@@ -446,7 +454,8 @@ export type StableChunk__1 = [] | [
     { 'v3_chunk' : { 'assetsChunk' : Array<AssetV2> } }
 ];
 export type StableChunk__2 = [] | [
-  { 'v1' : { 'disbursements' : Array<Disbursement> } }
+  { 'v1' : { 'disbursements' : Array<Disbursement> } } |
+    { 'v2' : { 'disbursements' : Array<DisbursementV2> } }
 ];
 export type StableChunk__3 = [] | [
   {
