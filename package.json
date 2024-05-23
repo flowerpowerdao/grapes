@@ -22,10 +22,10 @@
     "mint-2": "dfx canister call staging addAsset '(record {name = \"privat0\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world0!\"} } })' && dfx canister call staging addAsset '(record {name = \"privat1\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world1!\"} } })' && dfx canister call staging initMint && dfx canister call staging shuffleTokensForSale && dfx canister call staging enableSale",
     "mint:test": "dfx canister call test addAsset '(record {name = \"privat\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world!\"} } })' && dfx canister call test initMint && dfx canister call test shuffleTokensForSale && dfx canister call test enableSale",
     "mint:test-2": "dfx canister call test addAsset '(record {name = \"privat0\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world0!\"} } })' && dfx canister call test addAsset '(record {name = \"privat1\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world1!\"} } })' && dfx canister call test initMint && dfx canister call test shuffleTokensForSale && dfx canister call test enableSale",
-    "vitest": "vitest run --threads false --isolate false",
+    "vitest": "vitest run --pool forks --poolOptions.forks.singleFork true --poolOptions.forks.isolate false",
     "vitest:watch": "vitest watch",
     "env": "tsx ./test/e2e/apply-env.ts",
-    "test:e2e": "dfx build staging && vitest run --threads false --isolate false --reporter verbose --bail 1",
+    "test:e2e": "dfx build staging && vitest run --pool forks --poolOptions.forks.singleFork true --poolOptions.forks.isolate false --reporter verbose --bail 1",
     "test:unit": "mops test",
     "test": "npm run test:unit && npm run test:e2e",
     "backup": "tsx ./backup/backup.ts",
@@ -50,7 +50,7 @@
     "pem-file": "^1.0.1",
     "tsx": "4.11.0",
     "typescript": "5.4.5",
-    "vite": "^4.3.9",
-    "vitest": "^0.31.1"
+    "vite": "5.2.11",
+    "vitest": "1.6.0"
   }
 }
