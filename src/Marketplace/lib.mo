@@ -281,21 +281,6 @@ module {
         tokenIndex = token;
       });
 
-      // add event to CAP
-      let event : Root.IndefiniteEvent = {
-        operation = "sale";
-        details = [
-          ("to", #Text(settlement.buyer)),
-          ("from", #Principal(settlement.seller)),
-          ("price_decimals", #U64(8)),
-          ("price_currency", #Text("ICP")),
-          ("price", #U64(settlement.price)),
-          ("token_id", #Text(tokenid)),
-        ];
-        caller;
-      };
-      ignore deps._Cap.insert(event);
-
       // transfer token to new owner
       deps._Tokens.transferTokenToUser(token, settlement.buyer);
 
@@ -310,6 +295,21 @@ module {
       });
       _tokenListing.delete(token);
       _tokenSettlement.delete(token);
+
+      // add event to CAP
+      let event : Root.IndefiniteEvent = {
+        operation = "sale";
+        details = [
+          ("to", #Text(settlement.buyer)),
+          ("from", #Principal(settlement.seller)),
+          ("price_decimals", #U64(8)),
+          ("price_currency", #Text("ICP")),
+          ("price", #U64(settlement.price)),
+          ("token_id", #Text(tokenid)),
+        ];
+        caller;
+      };
+      ignore deps._Cap.insert(event);
 
       return #ok();
     };

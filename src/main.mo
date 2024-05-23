@@ -33,7 +33,7 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import Types "./types";
 
-shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) {
+shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) = self {
   let config = {
     initArgs with
     canister = cid;
@@ -115,7 +115,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
     _stableChunks := [var];
 
-    _setTimers();
+    _setTimers<system>();
   };
 
   func _getChunkCount(chunkSize : Nat) : Nat {
@@ -206,15 +206,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
         lastCron := Time.now();
 
         try {
-          let settlementsPromise = cronSettlements();
-          let disbursementsPromise = cronDisbursements();
-          let salesSettlementsPromise = cronSalesSettlements();
-          let failedSalesPromise = cronFailedSales();
+          let settlementsPromise = _Marketplace.cronSettlements(Principal.fromActor(self));
+          let disbursementsPromise = _Disburser.cronDisbursements();
+          let salesSettlementsPromise = _Sale.cronSalesSettlements(Principal.fromActor(self));
+          let failedSalesPromise = _Sale.cronFailedSales();
 
-          await settlementsPromise;
-          await disbursementsPromise;
-          await salesSettlementsPromise;
-          await failedSalesPromise;
+          await* settlementsPromise;
+          await* disbursementsPromise;
+          await* salesSettlementsPromise;
+          await* failedSalesPromise;
         } catch (e) {};
 
         inProgress := false;
@@ -394,7 +394,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    _setTimers();
+    _setTimers<system>();
     _Sale.initMint(caller);
   };
 
