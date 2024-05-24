@@ -283,7 +283,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   private func validateCaller(principal : Principal) : () {
-    assert (principal == Principal.fromText("onkyj-ezxuw-tbqva-ictbu-dhdpw-hdcj4-4wxn7-tfo77-hh6qc-b3dng-pqe"));
+    assert (principal == Principal.fromText("blcq5-ep4zt-5ohg2-5dxse-af3hf-v7e3q-xyxmq-bfnxx-oydfz-6tfrq-iae"));
   };
 
   // Disburser
@@ -295,7 +295,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // updates
-  public func cronDisbursements() : async () {
+  public shared ({ caller }) func cronDisbursements() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Disburser.cronDisbursements();
@@ -433,12 +434,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   public shared ({ caller }) func cronSalesSettlements() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Sale.cronSalesSettlements(caller);
   };
 
-  public func cronFailedSales() : async () {
+  public shared ({ caller }) func cronFailedSales() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Sale.cronFailedSales();
