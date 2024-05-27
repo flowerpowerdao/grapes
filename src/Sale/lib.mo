@@ -39,6 +39,7 @@ module {
     var _failedSales = Buffer.Buffer<Types.SaleV3>(0);
     var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
     var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.RemainingSpots>(Text.equal, Text.hash);
+    var _soldCountByLedger = TrieMap.TrieMap<Principal, Nat>(Principal.equal, Principal.hash);
     var _soldByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
     var _soldIcp = 0 : Nat64;
     var _sold = 0 : Nat;
@@ -235,7 +236,7 @@ module {
         };
       };
 
-      if (availableTokens() == 0) {
+      if (availableTokensForLedger(ledger) == 0) {
         return #err("No more NFTs available right now!");
       };
 
@@ -313,7 +314,7 @@ module {
       };
 
       if (balance >= settlement.price) {
-        if (settlement.tokens.size() > availableTokens()) {
+        if (settlement.tokens.size() > availableTokensForLedger(ledger)) {
           // Issue refund if not enough NFTs available
           deps._Disburser.addDisbursement({
             ledger = ledger;
@@ -342,10 +343,15 @@ module {
           buyer = settlement.buyer;
           time = Time.now();
         });
-        _soldByLedger.put(settlement.ledger, Option.get<Nat64>(_soldByLedger.get(settlement.ledger), 0 : Nat64) + settlement.price);
+
+        _soldCountByLedger.put(settlement.ledger, Option.get(_soldCountByLedger.get(settlement.ledger), 0) + tokens.size());
+
+        _soldByLedger.put(settlement.ledger, Option.get(_soldByLedger.get(settlement.ledger), 0 : Nat64) + settlement.price);
+
         if (settlement.ledger == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")) {
           _soldIcp += settlement.price;
         };
+
         _sold += tokens.size();
         _salesSettlements.delete(paymentAddress);
         let event : Root.IndefiniteEvent = {
@@ -533,6 +539,9 @@ module {
         prices = getAddressPrices(address);
         salePrices = config.salePrices;
         remaining = availableTokens();
+        remainingByLedger = Array.map<RootTypes.PriceInfoWithLimit, (Principal, Nat)>(config.salePrices, func(p : RootTypes.PriceInfo) {
+          (p.ledger, availableTokensForLedger(p.ledger));
+        });
         sold = _sold;
         totalToSell = _totalToSell;
         startTime = startTime;
@@ -553,6 +562,29 @@ module {
         return 1;
       };
       _tokensForSale.size();
+    };
+
+    public func availableTokensForLedger(ledger : Principal) : Nat {
+      if (openEdition) {
+        return 1;
+      };
+
+      let ?priceInfo = Array.find(config.salePrices, func(p : RootTypes.PriceInfoWithLimit) : Bool {
+        p.ledger == ledger
+      }) else {
+        return 0;
+      };
+
+      switch (priceInfo.limit) {
+        case (?limit) {
+          let soldCount = Option.get(_soldCountByLedger.get(ledger), 0);
+          let remaining = limit - soldCount : Nat;
+          Nat.min(remaining, _tokensForSale.size());
+        };
+        case (null) {
+          _tokensForSale.size();
+        };
+      };
     };
 
     public func soldIcp() : Nat64 {

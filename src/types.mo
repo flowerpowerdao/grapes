@@ -24,6 +24,10 @@ module {
     price : Nat64; // e8s
   };
 
+  public type PriceInfoWithLimit = PriceInfo and {
+    limit : ?Nat;
+  };
+
   public type Whitelist = {
     name : Text;
     prices : [PriceInfo];
@@ -51,7 +55,7 @@ module {
       #supply: Nat; // fixed collection size
       #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')
     };
-    salePrices : [PriceInfo];
+    salePrices : [PriceInfoWithLimit];
     publicSaleStart : Time.Time;
     salesDistribution : [(Address, Nat64)];
     royalties : [(Address, Nat64)];

@@ -4,6 +4,7 @@
     "staging": {
       "type": "motoko",
       "main": "src/main.mo",
+      "specified_id": "rrkah-fqaaa-aaaaa-aaaaq-cai",
       "declarations": {
         "output": "declarations/main"
       }
@@ -12,16 +13,29 @@
       "type": "custom",
       "wasm": "declarations/ledger/ledger.wasm.gz",
       "candid": "declarations/ledger/ledger.did",
+      "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
       "remote": {
         "id": {
           "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }
       }
     },
+    "seed": {
+      "type": "custom",
+      "wasm": "declarations/ledger/ledger.wasm.gz",
+      "candid": "declarations/ledger/ledger.did",
+      "specified_id": "fua74-fyaaa-aaaan-qecrq-cai",
+      "remote": {
+        "id": {
+          "ic": "fua74-fyaaa-aaaan-qecrq-cai"
+        }
+      }
+    },
     "test": {
       "type": "custom",
       "wasm": ".dfx/local/canisters/staging/staging.wasm",
-      "candid": ".dfx/local/canisters/staging/staging.did"
+      "candid": ".dfx/local/canisters/staging/staging.did",
+      "specified_id": "r7inp-6aaaa-aaaaa-aaabq-cai"
     },
     "production": {
       "type": "motoko",
@@ -31,7 +45,8 @@
       "type": "assets",
       "source": [
         "assets/"
-      ]
+      ],
+      "specified_id": "e2ezq-2aaaa-aaaal-aafwa-cai"
     }
   },
   "dfx": "0.20.0",

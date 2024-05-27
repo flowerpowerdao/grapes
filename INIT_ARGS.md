@@ -56,6 +56,11 @@ salePrices = vec {
     ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
     price = 700_000_000; // 7 ICP
   };
+  record {
+    ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
+    price = 1100_000_000; // 11 SEED
+    limit = opt 100; // max 100 NFTs can be purchased with this ledger
+  };
   // other ledgers...
 };
 ```

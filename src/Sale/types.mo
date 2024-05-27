@@ -131,6 +131,7 @@ module {
     salePrice : Nat64; // legacy ICP price
     sold : Nat;
     remaining : Nat;
+    remainingByLedger : [(Principal, Nat)];
     startTime : Time;
     endTime : Time;
     whitelistTime : Time;
