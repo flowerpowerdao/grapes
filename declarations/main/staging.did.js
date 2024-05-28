@@ -33,6 +33,11 @@ export const idlFactory = ({ IDL }) => {
     'prices' : IDL.Vec(PriceInfo),
   });
   const Address = IDL.Text;
+  const PriceInfoWithLimit = IDL.Record({
+    'limit' : IDL.Opt(IDL.Nat),
+    'ledger' : IDL.Principal,
+    'price' : IDL.Nat64,
+  });
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
@@ -47,7 +52,7 @@ export const idlFactory = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(Address, IDL.Nat64)),
-    'salePrices' : IDL.Vec(PriceInfo),
+    'salePrices' : IDL.Vec(PriceInfoWithLimit),
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),
     'publicSaleStart' : Time,
@@ -314,13 +319,14 @@ export const idlFactory = ({ IDL }) => {
     'err' : CommonError__1,
   });
   const Extension = IDL.Text;
+  const Address__3 = IDL.Text;
   const SaleV3 = IDL.Record({
     'expires' : Time__2,
     'subaccount' : SubAccount__1,
     'whitelistName' : IDL.Opt(IDL.Text),
     'tokens' : IDL.Vec(TokenIndex__2),
     'ledger' : IDL.Principal,
-    'buyer' : AccountIdentifier__4,
+    'buyer' : Address__3,
     'price' : IDL.Nat64,
   });
   const StatusRequest = IDL.Record({
@@ -501,15 +507,18 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Tuple(Address__1, IDL.Nat64),
     'err' : IDL.Text,
   });
-  const SaleSettings = IDL.Record({
+  const SaleSettingsV3 = IDL.Record({
     'startTime' : Time__2,
     'whitelist' : IDL.Bool,
     'endTime' : Time__2,
     'totalToSell' : IDL.Nat,
     'sold' : IDL.Nat,
+    'remainingByLedger' : IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat)),
     'whitelistTime' : Time__2,
+    'prices' : IDL.Vec(PriceInfo),
     'salePrice' : IDL.Nat64,
     'remaining' : IDL.Nat,
+    'salePrices' : IDL.Vec(PriceInfo),
     'openEdition' : IDL.Bool,
     'price' : IDL.Nat64,
   });
@@ -643,7 +652,7 @@ export const idlFactory = ({ IDL }) => {
     'restoreChunk' : IDL.Func([StableChunk], [], []),
     'retrieve' : IDL.Func([Address__1], [Result_4], []),
     'saleTransactions' : IDL.Func([], [IDL.Vec(SaleTransaction)], ['query']),
-    'salesSettings' : IDL.Func([Address__1], [SaleSettings], ['query']),
+    'salesSettings' : IDL.Func([Address__1], [SaleSettingsV3], ['query']),
     'salesSettlements' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(Address__1, Sale))],
@@ -718,6 +727,11 @@ export const init = ({ IDL }) => {
     'prices' : IDL.Vec(PriceInfo),
   });
   const Address = IDL.Text;
+  const PriceInfoWithLimit = IDL.Record({
+    'limit' : IDL.Opt(IDL.Nat),
+    'ledger' : IDL.Principal,
+    'price' : IDL.Nat64,
+  });
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
@@ -732,7 +746,7 @@ export const init = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(Address, IDL.Nat64)),
-    'salePrices' : IDL.Vec(PriceInfo),
+    'salePrices' : IDL.Vec(PriceInfoWithLimit),
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),
     'publicSaleStart' : Time,

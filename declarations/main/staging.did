@@ -259,7 +259,7 @@ type Settlement =
  };
 type SaleV3 = 
  record {
-   buyer: AccountIdentifier__4;
+   buyer: Address__3;
    expires: Time__2;
    ledger: principal;
    price: nat64;
@@ -284,13 +284,19 @@ type SaleTransaction =
    time: Time__2;
    tokens: vec TokenIndex__2;
  };
-type SaleSettings = 
+type SaleSettingsV3 = 
  record {
    endTime: Time__2;
    openEdition: bool;
    price: nat64;
+   prices: vec PriceInfo;
    remaining: nat;
+   remainingByLedger: vec record {
+                            principal;
+                            nat;
+                          };
    salePrice: nat64;
+   salePrices: vec PriceInfo;
    sold: nat;
    startTime: Time__2;
    totalToSell: nat;
@@ -367,6 +373,12 @@ type Result =
            };
  };
 type RemainingSpots = nat;
+type PriceInfoWithLimit = 
+ record {
+   ledger: principal;
+   limit: opt nat;
+   price: nat64;
+ };
 type PriceInfo = 
  record {
    ledger: principal;
@@ -466,7 +478,7 @@ type InitArgs =
            duration: Duration;
            supply: nat;
          };
-   salePrices: vec PriceInfo;
+   salePrices: vec PriceInfoWithLimit;
    salesDistribution: vec record {
                             Address;
                             nat64;
@@ -747,7 +759,7 @@ type Canister =
    restoreChunk: (StableChunk) -> ();
    retrieve: (Address__1) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
-   salesSettings: (Address__1) -> (SaleSettings) query;
+   salesSettings: (Address__1) -> (SaleSettingsV3) query;
    salesSettlements: () -> (vec record {
                                   Address__1;
                                   Sale;
@@ -797,6 +809,7 @@ type AssetV2 =
    thumbnail: opt File;
    thumbnailUrl: opt text;
  };
+type Address__3 = text;
 type Address__2 = text;
 type Address__1 = text;
 type Address = text;

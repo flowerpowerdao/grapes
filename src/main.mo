@@ -460,7 +460,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.saleTransactions();
   };
 
-  public query func salesSettings(address : Address) : async SaleTypes.SaleSettings {
+  public query func salesSettings(address : Address) : async SaleTypes.SaleSettingsV3 {
     _Sale.salesSettings(address);
   };
 

@@ -12,6 +12,7 @@ export type AccountIdentifier__6 = string;
 export type Address = string;
 export type Address__1 = string;
 export type Address__2 = string;
+export type Address__3 = string;
 export interface AssetV2 {
   'thumbnail' : [] | [File],
   'payloadUrl' : [] | [string],
@@ -86,7 +87,7 @@ export interface Canister {
   'restoreChunk' : ActorMethod<[StableChunk], undefined>,
   'retrieve' : ActorMethod<[Address__1], Result_4>,
   'saleTransactions' : ActorMethod<[], Array<SaleTransaction>>,
-  'salesSettings' : ActorMethod<[Address__1], SaleSettings>,
+  'salesSettings' : ActorMethod<[Address__1], SaleSettingsV3>,
   'salesSettlements' : ActorMethod<[], Array<[Address__1, Sale]>>,
   'setTimers' : ActorMethod<[], undefined>,
   'settle' : ActorMethod<[TokenIdentifier__1], Result_3>,
@@ -279,7 +280,7 @@ export interface InitArgs {
   'revealDelay' : Duration,
   'airdrop' : Array<AccountIdentifier>,
   'royalties' : Array<[Address, bigint]>,
-  'salePrices' : Array<PriceInfo>,
+  'salePrices' : Array<PriceInfoWithLimit>,
   'marketDelay' : [] | [Duration],
   'singleAssetCollection' : [] | [boolean],
   'publicSaleStart' : Time,
@@ -340,6 +341,11 @@ export interface NumericEntity {
   'last' : bigint,
 }
 export interface PriceInfo { 'ledger' : Principal, 'price' : bigint }
+export interface PriceInfoWithLimit {
+  'limit' : [] | [bigint],
+  'ledger' : Principal,
+  'price' : bigint,
+}
 export type RemainingSpots = bigint;
 export type Result = {
     'ok' : Array<[TokenIndex, [] | [Listing], [] | [Uint8Array | number[]]]>
@@ -371,15 +377,18 @@ export interface Sale {
   'buyer' : AccountIdentifier__4,
   'price' : bigint,
 }
-export interface SaleSettings {
+export interface SaleSettingsV3 {
   'startTime' : Time__2,
   'whitelist' : boolean,
   'endTime' : Time__2,
   'totalToSell' : bigint,
   'sold' : bigint,
+  'remainingByLedger' : Array<[Principal, bigint]>,
   'whitelistTime' : Time__2,
+  'prices' : Array<PriceInfo>,
   'salePrice' : bigint,
   'remaining' : bigint,
+  'salePrices' : Array<PriceInfo>,
   'openEdition' : boolean,
   'price' : bigint,
 }
@@ -404,7 +413,7 @@ export interface SaleV3 {
   'whitelistName' : [] | [string],
   'tokens' : Uint32Array | number[],
   'ledger' : Principal,
-  'buyer' : AccountIdentifier__4,
+  'buyer' : Address__3,
   'price' : bigint,
 }
 export interface Settlement {
