@@ -156,8 +156,8 @@ whitelists = vec {
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000; // can be omitted
     addresses = vec {
-      "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a";
-      "a6da832e6f11f4848c6a533f05f3f1c8ed20e948503931a380523718fb215887";
+      "da1fae1e25a417ab70953983a0c83ae5d7ee68ea83b1ac7b291246a29c87cc04";
+      "d29028c05d4b3a4e54b2c9040dd6d5acf8d79308b28344898729a0de0a52b241";
       // ...
     };
   };
@@ -173,8 +173,8 @@ whitelists = vec {
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000;
     addresses = vec {
-      "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a";
-      "a6da832e6f11f4848c6a533f05f3f1c8ed20e948503931a380523718fb215887";
+      "b35858170c410ce65ae3dc9d36298766aa36d287854fe43dcb65998f19bc5881";
+      "68b9a81e80a707742e8639d92e69e629734c1bd7da330a7bef67247f80ea72dc";
       // ...
     };
   };

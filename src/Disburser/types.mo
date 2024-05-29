@@ -15,7 +15,7 @@ module {
 
   public type DisbursementV2 = {
     ledger : Principal;
-    to : Address;
+    to : Address; // account id for ICP, ICRC-1 account text for other tokens
     fromSubaccount : SubAccount;
     amount : Nat64;
     tokenIndex : TokenIndex;

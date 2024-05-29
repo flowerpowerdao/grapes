@@ -31,7 +31,7 @@ module {
       if (chunkIndex != 0) {
         return null;
       };
-      ?#v1({
+      ?#v2({
         disbursements = List.toArray(_disbursements);
       });
     };

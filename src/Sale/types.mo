@@ -9,22 +9,6 @@ import Types "../types";
 
 module {
   public type StableChunk = ?{
-    // v1
-    #v1: {
-      saleTransactionCount : Nat;
-      saleTransactionChunk : [SaleTransaction];
-      salesSettlements : [(AccountIdentifier, SaleV1)];
-      failedSales : [(AccountIdentifier, SubAccount)];
-      tokensForSale : [TokenIndex];
-      whitelist : [(Nat64, AccountIdentifier, WhitelistSlot)];
-      soldIcp : Nat64;
-      sold : Nat;
-      totalToSell : Nat;
-      nextSubAccount : Nat;
-    };
-    #v1_chunk: {
-      saleTransactionChunk : [SaleTransaction];
-    };
     // v2
     #v2: {
       saleTransactionCount : Nat;
@@ -40,6 +24,22 @@ module {
     };
     #v2_chunk: {
       saleTransactionChunk : [SaleTransaction];
+    };
+    // v3
+    #v3: {
+      saleTransactionCount : Nat;
+      saleTransactionChunk : [SaleTransactionV3];
+      salesSettlements : [(AccountIdentifier, SaleV3)];
+      failedSales : [SaleV3];
+      tokensForSale : [TokenIndex];
+      whitelistSpots : [(WhitelistSpotId, RemainingSpots)];
+      saleCountByLedger : [(Principal, Nat)];
+      saleVolumeByLedger : [(Principal, Nat)];
+      totalToSell : Nat;
+      nextSubAccount : Nat;
+    };
+    #v3_chunk: {
+      saleTransactionChunk : [SaleTransactionV3];
     };
   };
 

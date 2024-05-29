@@ -39,10 +39,8 @@ module {
     var _failedSales = Buffer.Buffer<Types.SaleV3>(0);
     var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
     var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.RemainingSpots>(Text.equal, Text.hash);
-    var _soldCountByLedger = TrieMap.TrieMap<Principal, Nat>(Principal.equal, Principal.hash);
-    var _soldByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
-    var _soldIcp = 0 : Nat64;
-    var _sold = 0 : Nat;
+    var _saleCountByLedger = TrieMap.TrieMap<Principal, Nat>(Principal.equal, Principal.hash);
+    var _saleVolumeByLedger = TrieMap.TrieMap<Principal, Nat>(Principal.equal, Principal.hash);
     var _totalToSell = 0 : Nat;
     var _nextSubAccount = 0 : Nat;
 
@@ -55,71 +53,100 @@ module {
     };
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      null;
-      // let start = Nat.min(_saleTransactions.size(), chunkSize * chunkIndex);
-      // let count = Nat.min(chunkSize, _saleTransactions.size() - start);
-      // let saleTransactionChunk = if (_saleTransactions.size() == 0 or count == 0) {
-      //   [];
-      // } else {
-      //   Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, count));
-      // };
+      let start = Nat.min(_saleTransactions.size(), chunkSize * chunkIndex);
+      let count = Nat.min(chunkSize, _saleTransactions.size() - start);
+      let saleTransactionChunk = if (_saleTransactions.size() == 0 or count == 0) {
+        [];
+      } else {
+        Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, count));
+      };
 
-      // if (chunkIndex == 0) {
-      //   ? #v2({
-      //     saleTransactionCount = _saleTransactions.size();
-      //     saleTransactionChunk;
-      //     salesSettlements = Iter.toArray(_salesSettlements.entries());
-      //     failedSales = Buffer.toArray(_failedSales);
-      //     tokensForSale = Buffer.toArray(_tokensForSale);
-      //     whitelistSpots = Iter.toArray(_whitelistSpots.entries());
-      //     soldIcp = _soldIcp;
-      //     sold = _sold;
-      //     totalToSell = _totalToSell;
-      //     nextSubAccount = _nextSubAccount;
-      //   });
-      // } else if (chunkIndex < getChunkCount(chunkSize)) {
-      //   return ? #v2_chunk({ saleTransactionChunk });
-      // } else {
-      //   null;
-      // };
+      if (chunkIndex == 0) {
+        ?#v3({
+          saleTransactionCount = _saleTransactions.size();
+          saleTransactionChunk;
+          salesSettlements = Iter.toArray(_salesSettlements.entries());
+          failedSales = Buffer.toArray(_failedSales);
+          tokensForSale = Buffer.toArray(_tokensForSale);
+          whitelistSpots = Iter.toArray(_whitelistSpots.entries());
+          saleCountByLedger = Iter.toArray(_saleCountByLedger.entries());
+          saleVolumeByLedger = Iter.toArray(_saleVolumeByLedger.entries());
+          totalToSell = _totalToSell;
+          nextSubAccount = _nextSubAccount;
+        });
+      } else if (chunkIndex < getChunkCount(chunkSize)) {
+        return ? #v3_chunk({ saleTransactionChunk });
+      } else {
+        null;
+      };
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
-      // switch (chunk) {
-      //   // v1
-      //   case (? #v1(data)) {
-      //     _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
-      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-      //     // _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
-      //     _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
-      //     _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
-      //     // _whitelistSpots := data.whitelist??; leaving empty for ended sales
-      //     _soldIcp := data.soldIcp;
-      //     _sold := data.sold;
-      //     _totalToSell := data.totalToSell;
-      //     _nextSubAccount := data.nextSubAccount;
-      //   };
-      //   case (? #v1_chunk(data)) {
-      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-      //   };
-      //   // v2
-      //   case (? #v2(data)) {
-      //     _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
-      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-      //     _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
-      //     _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
-      //     _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
-      //     _whitelistSpots := TrieMap.fromEntries(data.whitelistSpots.vals(), Text.equal, Text.hash);
-      //     _soldIcp := data.soldIcp;
-      //     _sold := data.sold;
-      //     _totalToSell := data.totalToSell;
-      //     _nextSubAccount := data.nextSubAccount;
-      //   };
-      //   case (? #v2_chunk(data)) {
-      //     _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-      //   };
-      //   case (null) {};
-      // };
+      switch (chunk) {
+        // v2 -> v3
+        case (?#v2(data)) {
+          _saleTransactions := Buffer.Buffer<Types.SaleTransactionV3>(data.saleTransactionCount);
+
+          data.saleTransactionChunk
+            |> Array.map(_, func(txV2 : Types.SaleTransaction) : Types.SaleTransactionV3 {
+              {
+                txV2 with
+                ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+              };
+            })
+            |> Buffer.fromArray<Types.SaleTransactionV3>(_)
+            |> _saleTransactions.append(_);
+
+          _salesSettlements := data.salesSettlements.vals()
+            |> Iter.map<(Types.Address, Types.Sale), (Types.Address, Types.SaleV3)>(_, func((address : Types.Address, saleV2 : Types.Sale)) : (Types.Address, Types.SaleV3) {
+              (address, {
+                saleV2 with
+                ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+              });
+            })
+            |> TrieMap.fromEntries(_, Text.equal, Text.hash);
+
+          // skip: not enough data to convert
+          // _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
+
+          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
+          _whitelistSpots := TrieMap.fromEntries(data.whitelistSpots.vals(), Text.equal, Text.hash);
+
+          _saleCountByLedger.put(Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"), data.sold);
+          _saleVolumeByLedger.put(Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"), Nat64.toNat(data.soldIcp));
+
+          _totalToSell := data.totalToSell;
+          _nextSubAccount := data.nextSubAccount;
+        };
+        case (?#v2_chunk(data)) {
+          data.saleTransactionChunk
+            |> Array.map(_, func(txV2 : Types.SaleTransaction) : Types.SaleTransactionV3 {
+              {
+                txV2 with
+                ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+              };
+            })
+            |> Buffer.fromArray<Types.SaleTransactionV3>(_)
+            |> _saleTransactions.append(_);
+        };
+        // v3
+        case (?#v3(data)) {
+          _saleTransactions := Buffer.Buffer<Types.SaleTransactionV3>(data.saleTransactionCount);
+          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+          _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), Text.equal, Text.hash);
+          _failedSales := Buffer.fromArray<Types.SaleV3>(data.failedSales);
+          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
+          _whitelistSpots := TrieMap.fromEntries(data.whitelistSpots.vals(), Text.equal, Text.hash);
+          _saleCountByLedger := TrieMap.fromEntries(data.saleCountByLedger.vals(), Principal.equal, Principal.hash);
+          _saleVolumeByLedger := TrieMap.fromEntries(data.saleVolumeByLedger.vals(), Principal.equal, Principal.hash);
+          _totalToSell := data.totalToSell;
+          _nextSubAccount := data.nextSubAccount;
+        };
+        case (?#v3_chunk(data)) {
+          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+        };
+        case (null) {};
+      };
     };
 
     public func grow(n : Nat) : Nat {
@@ -344,15 +371,9 @@ module {
           time = Time.now();
         });
 
-        _soldCountByLedger.put(settlement.ledger, Option.get(_soldCountByLedger.get(settlement.ledger), 0) + tokens.size());
+        _saleCountByLedger.put(settlement.ledger, Option.get(_saleCountByLedger.get(settlement.ledger), 0) + tokens.size());
+        _saleVolumeByLedger.put(settlement.ledger, Option.get(_saleVolumeByLedger.get(settlement.ledger), 0) + Nat64.toNat(settlement.price));
 
-        _soldByLedger.put(settlement.ledger, Option.get(_soldByLedger.get(settlement.ledger), 0 : Nat64) + settlement.price);
-
-        if (settlement.ledger == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")) {
-          _soldIcp += settlement.price;
-        };
-
-        _sold += tokens.size();
         _salesSettlements.delete(paymentAddress);
         let event : Root.IndefiniteEvent = {
           operation = "mint";
@@ -501,7 +522,15 @@ module {
     };
 
     public func getSold() : Nat {
-      _sold;
+      var totalSold = 0;
+      for (sold in _saleCountByLedger.vals()) {
+        totalSold += sold;
+      };
+      totalSold;
+    };
+
+    public func soldIcp() : Nat64 {
+      Nat64.fromNat(Option.get(_saleVolumeByLedger.get(Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")), 0));
     };
 
     public func getTotalToSell() : Nat {
@@ -542,7 +571,7 @@ module {
         remainingByLedger = Array.map<RootTypes.PriceInfoWithLimit, (Principal, Nat)>(config.salePrices, func(p : RootTypes.PriceInfo) {
           (p.ledger, availableTokensForLedger(p.ledger));
         });
-        sold = _sold;
+        sold = getSold();
         totalToSell = _totalToSell;
         startTime = startTime;
         endTime = endTime;
@@ -577,7 +606,7 @@ module {
 
       switch (priceInfo.limit) {
         case (?limit) {
-          let soldCount = Option.get(_soldCountByLedger.get(ledger), 0);
+          let soldCount = Option.get(_saleCountByLedger.get(ledger), 0);
           let remaining = limit - soldCount : Nat;
           Nat.min(remaining, _tokensForSale.size());
         };
@@ -585,10 +614,6 @@ module {
           _tokensForSale.size();
         };
       };
-    };
-
-    public func soldIcp() : Nat64 {
-      _soldIcp;
     };
 
     // internals
