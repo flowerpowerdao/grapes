@@ -4,8 +4,8 @@
   },
   "scripts": {
     "start": "npm run replica && npm run deploy-local && npm run mint",
-    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background",
-    "replica:no-delay": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0",
+    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && dfx canister create --all --no-wallet",
+    "replica:no-delay": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0 && dfx canister create --all --no-wallet",
     "build": "",
     "deploy-local": "npm run deploy:ledger && npm run deploy:seed && npm run deploy:staging && dfx deploy assets",
     "deploy-test": "npm run reinstall:ledger -- -qq && npm run reinstall:seed -- -qq && npm run reinstall:test -- -qq",
