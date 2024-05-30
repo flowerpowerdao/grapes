@@ -68,7 +68,9 @@ module {
           salesSettlements = Iter.toArray(_salesSettlements.entries());
           failedSales = Buffer.toArray(_failedSales);
           tokensForSale = Buffer.toArray(_tokensForSale);
-          whitelistSpots = Iter.toArray(_whitelistSpots.entries());
+          whitelistSpots = Iter.toArray(Iter.sort<(Types.WhitelistSpotId, Types.RemainingSpots)>(_whitelistSpots.entries(), func(a, b) {
+            return Text.compare(a.0, b.0);
+          }));
           saleCountByLedger = Iter.toArray(_saleCountByLedger.entries());
           saleVolumeByLedger = Iter.toArray(_saleVolumeByLedger.entries());
           totalToSell = _totalToSell;
