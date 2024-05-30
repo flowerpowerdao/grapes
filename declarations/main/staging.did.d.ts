@@ -399,12 +399,12 @@ export interface SaleTransaction {
   'buyer' : AccountIdentifier__4,
   'price' : bigint,
 }
-export interface SaleV1 {
-  'expires' : Time__2,
-  'slot' : [] | [WhitelistSlot],
-  'subaccount' : SubAccount__1,
+export interface SaleTransactionV3 {
+  'time' : Time__2,
+  'seller' : Principal,
   'tokens' : Uint32Array | number[],
-  'buyer' : AccountIdentifier__4,
+  'ledger' : Principal,
+  'buyer' : Address__3,
   'price' : bigint,
 }
 export interface SaleV3 {
@@ -489,20 +489,6 @@ export type StableChunk__3 = [] | [
 ];
 export type StableChunk__4 = [] | [
   {
-      'v1' : {
-        'whitelist' : Array<[bigint, AccountIdentifier__4, WhitelistSlot]>,
-        'salesSettlements' : Array<[AccountIdentifier__4, SaleV1]>,
-        'totalToSell' : bigint,
-        'failedSales' : Array<[AccountIdentifier__4, SubAccount__1]>,
-        'sold' : bigint,
-        'saleTransactionChunk' : Array<SaleTransaction>,
-        'saleTransactionCount' : bigint,
-        'nextSubAccount' : bigint,
-        'soldIcp' : bigint,
-        'tokensForSale' : Uint32Array | number[],
-      }
-    } |
-    {
       'v2' : {
         'salesSettlements' : Array<[AccountIdentifier__4, Sale]>,
         'totalToSell' : bigint,
@@ -516,8 +502,22 @@ export type StableChunk__4 = [] | [
         'tokensForSale' : Uint32Array | number[],
       }
     } |
-    { 'v1_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } } |
-    { 'v2_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } }
+    {
+      'v3' : {
+        'saleCountByLedger' : Array<[Principal, bigint]>,
+        'salesSettlements' : Array<[AccountIdentifier__4, SaleV3]>,
+        'saleVolumeByLedger' : Array<[Principal, bigint]>,
+        'totalToSell' : bigint,
+        'failedSales' : Array<SaleV3>,
+        'saleTransactionChunk' : Array<SaleTransactionV3>,
+        'saleTransactionCount' : bigint,
+        'nextSubAccount' : bigint,
+        'whitelistSpots' : Array<[WhitelistSpotId, RemainingSpots]>,
+        'tokensForSale' : Uint32Array | number[],
+      }
+    } |
+    { 'v2_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } } |
+    { 'v3_chunk' : { 'saleTransactionChunk' : Array<SaleTransactionV3> } }
 ];
 export type StableChunk__5 = [] | [{ 'v1' : { 'isShuffled' : boolean } }];
 export type StableChunk__6 = [] | [
@@ -607,7 +607,6 @@ export interface Whitelist {
   'addresses' : Array<AccountIdentifier>,
   'prices' : Array<PriceInfo>,
 }
-export interface WhitelistSlot { 'end' : Time, 'start' : Time }
 export type WhitelistSpotId = string;
 export interface _SERVICE extends Canister {}
 export declare const idlFactory: IDL.InterfaceFactory;

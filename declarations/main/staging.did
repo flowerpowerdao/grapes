@@ -1,9 +1,4 @@
 type WhitelistSpotId = text;
-type WhitelistSlot = 
- record {
-   end: Time;
-   start: Time;
- };
 type Whitelist = 
  record {
    addresses: vec AccountIdentifier;
@@ -119,30 +114,6 @@ type StableChunk__5 = opt variant {v1: record {isShuffled: bool;};};
 type StableChunk__4 = 
  opt
   variant {
-    v1:
-     record {
-       failedSales: vec record {
-                          AccountIdentifier__4;
-                          SubAccount__1;
-                        };
-       nextSubAccount: nat;
-       saleTransactionChunk: vec SaleTransaction;
-       saleTransactionCount: nat;
-       salesSettlements: vec record {
-                               AccountIdentifier__4;
-                               SaleV1;
-                             };
-       sold: nat;
-       soldIcp: nat64;
-       tokensForSale: vec TokenIndex__2;
-       totalToSell: nat;
-       whitelist: vec record {
-                        nat64;
-                        AccountIdentifier__4;
-                        WhitelistSlot;
-                      };
-     };
-    v1_chunk: record {saleTransactionChunk: vec SaleTransaction;};
     v2:
      record {
        failedSales: vec record {
@@ -166,6 +137,32 @@ type StableChunk__4 =
                            };
      };
     v2_chunk: record {saleTransactionChunk: vec SaleTransaction;};
+    v3:
+     record {
+       failedSales: vec SaleV3;
+       nextSubAccount: nat;
+       saleCountByLedger: vec record {
+                                principal;
+                                nat;
+                              };
+       saleTransactionChunk: vec SaleTransactionV3;
+       saleTransactionCount: nat;
+       saleVolumeByLedger: vec record {
+                                 principal;
+                                 nat;
+                               };
+       salesSettlements: vec record {
+                               AccountIdentifier__4;
+                               SaleV3;
+                             };
+       tokensForSale: vec TokenIndex__2;
+       totalToSell: nat;
+       whitelistSpots: vec record {
+                             WhitelistSpotId;
+                             RemainingSpots;
+                           };
+     };
+    v3_chunk: record {saleTransactionChunk: vec SaleTransactionV3;};
   };
 type StableChunk__3 = 
  opt
@@ -267,13 +264,13 @@ type SaleV3 =
    tokens: vec TokenIndex__2;
    whitelistName: opt text;
  };
-type SaleV1 = 
+type SaleTransactionV3 = 
  record {
-   buyer: AccountIdentifier__4;
-   expires: Time__2;
+   buyer: Address__3;
+   ledger: principal;
    price: nat64;
-   slot: opt WhitelistSlot;
-   subaccount: SubAccount__1;
+   seller: principal;
+   time: Time__2;
    tokens: vec TokenIndex__2;
  };
 type SaleTransaction = 
