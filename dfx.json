@@ -49,7 +49,7 @@
       "specified_id": "e2ezq-2aaaa-aaaal-aafwa-cai"
     }
   },
-  "dfx": "0.20.0",
+  "dfx": "0.20.1",
   "defaults": {
     "build": {
       "packtool": "mops sources",
