@@ -4,6 +4,7 @@
     "staging": {
       "type": "motoko",
       "main": "src/main.mo",
+      "init_arg_file": "initArgs.local.did",
       "specified_id": "rrkah-fqaaa-aaaaa-aaaaq-cai",
       "declarations": {
         "output": "declarations/main"
@@ -35,11 +36,13 @@
       "type": "custom",
       "wasm": ".dfx/local/canisters/staging/staging.wasm",
       "candid": ".dfx/local/canisters/staging/staging.did",
+      "init_arg_file": "test/e2e/initArgs.did",
       "specified_id": "r7inp-6aaaa-aaaaa-aaabq-cai"
     },
     "production": {
       "type": "motoko",
-      "main": "src/main.mo"
+      "main": "src/main.mo",
+      "init_arg_file": "initArgs.did"
     },
     "assets": {
       "type": "assets",
