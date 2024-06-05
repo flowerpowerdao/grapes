@@ -48,6 +48,8 @@ export interface Canister {
   'extensions' : ActorMethod<[], Array<Extension>>,
   'failedSales' : ActorMethod<[], Array<SaleV3>>,
   'frontends' : ActorMethod<[], Array<[string, Frontend]>>,
+  'getCallerFailedSales' : ActorMethod<[], Array<SaleV3>>,
+  'getCallerSettlements' : ActorMethod<[], Array<[Address__1, Sale]>>,
   'getCanistergeekInformation' : ActorMethod<
     [GetInformationRequest],
     GetInformationResponse

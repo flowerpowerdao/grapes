@@ -326,6 +326,7 @@ export const idlFactory = ({ IDL }) => {
     'err' : CommonError__1,
   });
   const Extension = IDL.Text;
+  const Address__1 = IDL.Text;
   const StatusRequest = IDL.Record({
     'memory_size' : IDL.Bool,
     'cycles' : IDL.Bool,
@@ -499,7 +500,6 @@ export const idlFactory = ({ IDL }) => {
     'Other' : IDL.Text,
   });
   const Result_6 = IDL.Variant({ 'ok' : Metadata__1, 'err' : CommonError });
-  const Address__1 = IDL.Text;
   const Result_5 = IDL.Variant({
     'ok' : IDL.Tuple(Address__1, IDL.Nat64),
     'err' : IDL.Text,
@@ -585,6 +585,12 @@ export const idlFactory = ({ IDL }) => {
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'failedSales' : IDL.Func([], [IDL.Vec(SaleV3)], ['query']),
     'frontends' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, Frontend))], []),
+    'getCallerFailedSales' : IDL.Func([], [IDL.Vec(SaleV3)], ['query']),
+    'getCallerSettlements' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(Address__1, Sale))],
+        ['query'],
+      ),
     'getCanistergeekInformation' : IDL.Func(
         [GetInformationRequest],
         [GetInformationResponse],

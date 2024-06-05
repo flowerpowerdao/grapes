@@ -713,6 +713,11 @@ type Canister =
                            text;
                            Frontend;
                          });
+   getCallerFailedSales: () -> (vec SaleV3) query;
+   getCallerSettlements: () -> (vec record {
+                                      Address__1;
+                                      Sale;
+                                    }) query;
    /// * Returns canister information based on passed parameters.
    ///     * Called from browser.
    getCanistergeekInformation: (GetInformationRequest) ->
