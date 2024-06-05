@@ -250,7 +250,7 @@ module {
       };
 
       // check if the ledger is allowed
-      if (_isLedgerAllowed(ledger)) {
+      if (not _isLedgerAllowed(ledger)) {
         return #err("This ledger is not allowed");
       };
 
@@ -407,7 +407,7 @@ module {
         };
         return #ok();
       } else {
-        // if the settlement expired and they still didnt send the full amount, we add them to failedSales
+        // if the settlement expired and they still didn't send the full amount, we add them to failedSales
         if (settlement.expires < Time.now()) {
           _failedSales.add(settlement);
           _salesSettlements.delete(paymentAddress);
@@ -436,7 +436,7 @@ module {
       // This is done by adding the await statement.
       // For every message the max cycles is reset
       label settleLoop while (true) {
-        switch (expiredSalesSettlements().entries().next()) {
+        switch (getExpiredSalesSettlements().entries().next()) {
           case (?(paymentAddress, settlement)) {
             try {
               ignore (await* retrieve(caller, paymentAddress));
@@ -764,7 +764,7 @@ module {
       deps._Tokens.mintCollection();
     };
 
-    func expiredSalesSettlements() : TrieMap.TrieMap<Types.Address, Types.SaleV3> {
+    func getExpiredSalesSettlements() : TrieMap.TrieMap<Types.Address, Types.SaleV3> {
       TrieMap.mapFilter<Types.Address, Types.SaleV3, Types.SaleV3>(
         _salesSettlements,
         Text.equal,
@@ -785,7 +785,7 @@ module {
     func _isLedgerAllowed(ledger : Principal) : Bool {
       Array.find(config.salePrices, func(p : RootTypes.PriceInfo) : Bool {
         p.ledger == ledger
-      }) == null;
+      }) != null;
     };
 
     let _feeByLedger = TrieMap.TrieMap<Principal, Nat64>(Principal.equal, Principal.hash);
