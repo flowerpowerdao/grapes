@@ -183,8 +183,8 @@ module {
 
       // turn whitelists into TrieMap for better performance
       for (whitelist in config.whitelists.vals()) {
-        for (address in whitelist.addresses.vals()) {
-          addWhitelistSpot(whitelist, address);
+        for (accountId in whitelist.addresses.vals()) {
+          addWhitelistSpot(whitelist, accountId);
         };
       };
 
@@ -313,7 +313,7 @@ module {
           return #err("Nothing to settle");
         };
       };
-      var ledger = settlement.ledger;
+      let ledger = settlement.ledger;
 
       let paymentAccount : ICRC1.Account = switch (Account.fromText(paymentAddress)) {
         case (#ok(account)) account;
@@ -335,7 +335,6 @@ module {
           return #err("Nothing to settle");
         };
       };
-      ledger := settlement.ledger;
 
       if (settlement.tokens.size() == 0) {
         _salesSettlements.delete(paymentAddress);
@@ -357,7 +356,7 @@ module {
           return #err("Not enough NFTs - a refund will be sent automatically very soon");
         };
 
-        var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
+        let tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
 
         // transfer tokens to buyer
         for (token in tokens.vals()) {
@@ -513,6 +512,24 @@ module {
     // queries
     public func salesSettlements() : [(Types.Address, Types.SaleV3)] {
       Iter.toArray(_salesSettlements.entries());
+    };
+
+    public func getUserSettlements(principal : Principal) : [(Types.Address, Types.SaleV3)] {
+      let ptext = Principal.toText(principal);
+      _salesSettlements.entries()
+        |> Iter.filter(_, func((address, settlement) : (Types.Address, Types.SaleV3)) : Bool {
+          settlement.buyer == ptext;
+        })
+        |> Iter.toArray(_);
+    };
+
+    public func getUserFailedSales(principal : Principal) : [Types.SaleV3] {
+      let ptext = Principal.toText(principal);
+      _failedSales.vals()
+        |> Iter.filter(_, func(sale : Types.SaleV3) : Bool {
+          sale.buyer == ptext;
+        })
+        |> Iter.toArray(_);
     };
 
     public func failedSales() : [Types.SaleV3] {

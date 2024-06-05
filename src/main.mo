@@ -452,6 +452,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.salesSettlements();
   };
 
+  public query ({caller}) func getCallerSettlements() : async [(Address, SaleTypes.Sale)] {
+    _Sale.getUserSettlements(caller);
+  };
+
+  public query ({caller}) func getCallerFailedSales() : async [SaleTypes.SaleV3] {
+    _Sale.getUserFailedSales(caller);
+  };
+
   public query func failedSales() : async [SaleTypes.SaleV3] {
     _Sale.failedSales();
   };
