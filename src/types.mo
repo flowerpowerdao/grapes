@@ -2,7 +2,8 @@ import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 
 module {
-  type AccountIdentifier = Text;
+  public type AccountIdentifier = Text;
+  public type Address = Text; // Legacy account identifier or ICRC-1 account
 
   public type Duration = {
     #nanoseconds : Nat;
@@ -18,9 +19,18 @@ module {
     end : Time.Time;
   };
 
+  public type PriceInfo = {
+    ledger : Principal;
+    price : Nat64; // e8s
+  };
+
+  public type PriceInfoWithLimit = PriceInfo and {
+    limit : ?Nat;
+  };
+
   public type Whitelist = {
     name : Text;
-    price : Nat64;
+    prices : [PriceInfo];
     addresses : [AccountIdentifier];
     oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
     startTime : Time.Time;
@@ -45,10 +55,10 @@ module {
       #supply: Nat; // fixed collection size
       #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')
     };
-    salePrice : Nat64; // e8s
+    salePrices : [PriceInfoWithLimit];
     publicSaleStart : Time.Time;
-    salesDistribution : [(AccountIdentifier, Nat64)];
-    royalties : [(AccountIdentifier, Nat64)];
+    salesDistribution : [(Address, Nat64)];
+    royalties : [(Address, Nat64)];
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled

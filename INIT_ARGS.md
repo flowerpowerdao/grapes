@@ -10,7 +10,12 @@ Customize `initArgs.did` before you deploy the canister.
   record {
     name = "Collection Name";
     sale = variant { supply = 10_000 };
-    salePrice = 700_000_000; // 7 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 700_000_000; // 7 ICP
+      };
+    };
     publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
     royalties = vec {};
@@ -46,7 +51,18 @@ sale = variant {
 
 ## Sale price
 ```candid
-salePrice = 700_000_000; // 7 ICP
+salePrices = vec {
+  record {
+    ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    price = 700_000_000; // 7 ICP
+  };
+  record {
+    ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
+    price = 1100_000_000; // 11 SEED
+    limit = opt 100; // max 100 NFTs can be purchased with this ledger
+  };
+  // other ledgers...
+};
 ```
 
 ## Public sale start
@@ -73,8 +89,8 @@ salesDistribution = vec {
 Example:
 ```candid
 salesDistribution = vec {
-  record { "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed"; 55000 }; // 55%
-  record { "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81"; 45000 }; // 45%
+  record { "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae"; 55000 }; // 55%
+  record { "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe"; 45000 }; // 45%
 };
 ```
 
@@ -86,8 +102,8 @@ Typically, total <= 10%
 Example:
 ```candid
 royalties = vec {
-  record { "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed"; 500 }; // 0.5%
-  record { "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81"; 300 }; // 0.3%
+  record { "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae"; 500 }; // 0.5%
+  record { "dwx4w-plydf-jxgs5-uncbu-mfyds-5vjzm-oohax-gmvja-cypv7-tmbt4-dqe"; 300 }; // 0.3%
 };
 ```
 
@@ -130,7 +146,12 @@ Place the nearest and cheapest whiteslist first.
 whitelists = vec {
   record {
     name = "ethflower";
-    price = 350000000; // 3.5 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 350000000; // 3.5 ICP
+      };
+    };
     oneTimeOnly = true; // whitelist addresses are removed after purchase
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000; // can be omitted
@@ -142,7 +163,12 @@ whitelists = vec {
   };
   record {
     name = "modclub";
-    price = 500000000; // 5 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 500000000; // 5 ICP
+      };
+    };
     oneTimeOnly = false;
     startTime = 1681992566953000000;
     endTime = opt 1681992566953000000;

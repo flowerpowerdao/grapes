@@ -33,7 +33,7 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import Types "./types";
 
-shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) {
+shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) = self {
   let config = {
     initArgs with
     canister = cid;
@@ -53,7 +53,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   /*********
   * TYPES *
   *********/
-  type AccountIdentifier = ExtCore.AccountIdentifier;
+  type Address = Types.Address;
   type SubAccount = ExtCore.SubAccount;
 
   type StableChunk = {
@@ -115,7 +115,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
     _stableChunks := [var];
 
-    _setTimers();
+    _setTimers<system>();
   };
 
   func _getChunkCount(chunkSize : Nat) : Nat {
@@ -184,7 +184,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_revealTimerId);
   };
 
-  func _setTimers() {
+  func _setTimers<system>() {
     _cancelTimers();
 
     let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
@@ -196,7 +196,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     var inProgress = false;
     var lastCron = Time.now();
 
-    _timerId := Timer.recurringTimer(
+    _timerId := Timer.recurringTimer<system>(
       #nanoseconds(timersInterval),
       func() : async () {
         if (inProgress and Time.now() < lastCron + forceInterval) {
@@ -206,15 +206,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
         lastCron := Time.now();
 
         try {
-          let settlementsPromise = cronSettlements();
-          let disbursementsPromise = cronDisbursements();
-          let salesSettlementsPromise = cronSalesSettlements();
-          let failedSalesPromise = cronFailedSales();
+          let settlementsPromise = _Marketplace.cronSettlements(Principal.fromActor(self));
+          let disbursementsPromise = _Disburser.cronDisbursements();
+          let salesSettlementsPromise = _Sale.cronSalesSettlements(Principal.fromActor(self));
+          let failedSalesPromise = _Sale.cronFailedSales();
 
-          await settlementsPromise;
-          await disbursementsPromise;
-          await salesSettlementsPromise;
-          await failedSalesPromise;
+          await* settlementsPromise;
+          await* disbursementsPromise;
+          await* salesSettlementsPromise;
+          await* failedSalesPromise;
         } catch (e) {};
 
         inProgress := false;
@@ -231,7 +231,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       } else {
         0;
       };
-      _revealTimerId := Timer.setTimer(
+      _revealTimerId := Timer.setTimer<system>(
         #nanoseconds(delay + randDelay),
         func() : async () {
           await _Assets.shuffleAssets();
@@ -240,9 +240,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
   };
 
-  public shared ({ caller }) func setTimers() : async () {
+  public shared ({ caller }) func setTimers<system>() : async () {
     assert (caller == init_minter);
-    _setTimers();
+    _setTimers<system>();
   };
 
   public shared ({ caller }) func cancelTimers() : async () {
@@ -283,19 +283,20 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   private func validateCaller(principal : Principal) : () {
-    assert (principal == Principal.fromText("onkyj-ezxuw-tbqva-ictbu-dhdpw-hdcj4-4wxn7-tfo77-hh6qc-b3dng-pqe"));
+    assert (principal == Principal.fromText("blcq5-ep4zt-5ohg2-5dxse-af3hf-v7e3q-xyxmq-bfnxx-oydfz-6tfrq-iae"));
   };
 
   // Disburser
   let _Disburser = Disburser.Factory(config);
 
   // queries
-  public query func getDisbursements() : async [DisburserTypes.Disbursement] {
+  public query func getDisbursements() : async [DisburserTypes.DisbursementV2] {
     _Disburser.getDisbursements();
   };
 
   // updates
-  public func cronDisbursements() : async () {
+  public shared ({ caller }) func cronDisbursements() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Disburser.cronDisbursements();
@@ -394,7 +395,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    _setTimers();
+    _setTimers<system>();
     _Sale.initMint(caller);
   };
 
@@ -419,37 +420,47 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.enableSale(caller);
   };
 
-  public func reserve(address : SaleTypes.AccountIdentifier) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+  public shared ({ caller }) func reserve(address : Address, ledger : Principal) : async Result.Result<(Address, Nat64), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
-    _Sale.reserve(address);
+    _Sale.reserve(caller, address, ledger);
   };
 
-  public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+  public shared ({ caller }) func retrieve(paymentAddress : Address) : async Result.Result<(), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'reserve'
-    await* _Sale.retrieve(caller, paymentaddress);
+    await* _Sale.retrieve(caller, paymentAddress);
   };
 
   public shared ({ caller }) func cronSalesSettlements() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Sale.cronSalesSettlements(caller);
   };
 
-  public func cronFailedSales() : async () {
+  public shared ({ caller }) func cronFailedSales() : async () {
+    assert(caller == config.minter or config.test == ?true);
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     await* _Sale.cronFailedSales();
   };
 
   // queries
-  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
+  public query func salesSettlements() : async [(Address, SaleTypes.Sale)] {
     _Sale.salesSettlements();
   };
 
-  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
+  public query ({caller}) func getCallerSettlements() : async [(Address, SaleTypes.Sale)] {
+    _Sale.getUserSettlements(caller);
+  };
+
+  public query ({caller}) func getCallerFailedSales() : async [SaleTypes.SaleV3] {
+    _Sale.getUserFailedSales(caller);
+  };
+
+  public query func failedSales() : async [SaleTypes.SaleV3] {
     _Sale.failedSales();
   };
 
@@ -457,7 +468,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.saleTransactions();
   };
 
-  public query func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
+  public query func salesSettings(address : Address) : async SaleTypes.SaleSettingsV3 {
     _Sale.salesSettings(address);
   };
 
@@ -553,10 +564,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
   };
 
-  public query func toAccountIdentifier(p : Text, sa : Nat) : async AccountIdentifier {
-    _Marketplace.toAccountIdentifier(p, sa);
-  };
-
   // EXT
   let _EXT = EXT.Factory(
     config,
@@ -633,10 +640,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // cycles
-  public func acceptCycles() : async () {
+  public func acceptCycles<system>() : async () {
     canistergeekMonitor.collectMetrics();
     let available = Cycles.available();
-    let accepted = Cycles.accept(available);
+    let accepted = Cycles.accept<system>(available);
     assert (accepted == available);
   };
 

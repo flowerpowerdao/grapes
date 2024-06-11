@@ -3,7 +3,8 @@ import { expect } from "vitest";
 import { User } from "./user";
 
 import canisterIds from '../../.dfx/local/canister_ids.json';
-import { AccountIdentifier } from "@dfinity/nns";
+import { AccountIdentifier, SubAccount } from "@dfinity/ledger-icp";
+import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
 
 export function feeOf(amount: bigint, fee: bigint) {
   return amount * fee / 100_000n;
@@ -18,15 +19,15 @@ export function applyFees(amount: bigint, fees: bigint[]) {
 }
 
 export async function buyFromSale(user: User) {
-  let settings = await user.mainActor.salesSettings(user.accountId);
-  let res = await user.mainActor.reserve(user.accountId);
+  let settings = await user.mainActor.salesSettings(user.address);
+  let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
   expect(res).toHaveProperty('ok');
 
   if ('ok' in res) {
     let paymentAddress = res.ok[0];
     let paymentAmount = res.ok[1];
-    expect(paymentAddress.length).toBe(64);
+    expect(paymentAddress.length).toBeGreaterThanOrEqual(38);
     expect(paymentAmount).toBe(settings.price);
 
     await user.sendICP(paymentAddress, paymentAmount);
@@ -78,5 +79,13 @@ export let tokenIdentifier = (index) => {
 };
 
 export let toAccount = (address: string) => {
+  if (address.length !== 64) {
+    let account = decodeIcrcAccount(address);
+    let subaccount = account.subaccount ? SubAccount.fromBytes(Uint8Array.from(account.subaccount)) : undefined;
+    if (subaccount instanceof Error) {
+      throw new Error("Invalid subaccount. " + subaccount.message);
+    }
+    return { account: AccountIdentifier.fromPrincipal({principal: account.owner, subAccount: subaccount}).toNumbers() };
+  }
   return { account: AccountIdentifier.fromHex(address).toNumbers() };
 }

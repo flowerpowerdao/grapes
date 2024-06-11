@@ -7,7 +7,7 @@ export default defineConfig({
     setupFiles: ['./test/e2e/setup.ts'],
     exclude: [
       '**/node_modules/**',
-      '**/.{git,dfx,vessel}/**',
+      '**/.{git,dfx,vessel,mops}/**',
       'test/e2e/restore/restore.test.ts', // contains only env.ts
     ],
   },

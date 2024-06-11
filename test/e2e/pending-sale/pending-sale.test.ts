@@ -2,11 +2,12 @@ import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './env';
+import {Principal} from '@dfinity/principal';
 
 describe('pending sale', () => {
   test('check salesSettings', async () => {
     let user = new User;
-    let res = await user.mainActor.salesSettings(user.accountId);
+    let res = await user.mainActor.salesSettings(user.address);
     expect(res.salePrice).toBe(env.salePrice);
     expect(res.price).toBe(env.salePrice);
     expect(res.remaining).toBe(7777n);
@@ -19,7 +20,7 @@ describe('pending sale', () => {
 
   test('check salesSettings price for whitelistTier0 address', async () => {
     let user = whitelistTier0[0];
-    let res = await user.mainActor.salesSettings(user.accountId);
+    let res = await user.mainActor.salesSettings(user.address);
     expect(res.salePrice).toBe(env.salePrice);
     expect(res.price).toBe(env.whitelistTier0Price);
   });
@@ -31,7 +32,7 @@ describe('pending sale', () => {
 
   test('check salesSettings price for whitelistTier1 address', async () => {
     let user = whitelistTier1[0];
-    let res = await user.mainActor.salesSettings(user.accountId);
+    let res = await user.mainActor.salesSettings(user.address);
     expect(res.salePrice).toBe(env.salePrice);
     expect(res.price).toBe(env.whitelistTier1Price);
   });
@@ -56,7 +57,7 @@ describe('pending sale', () => {
 
   test('try to reserve token', async () => {
     let user = new User;
-    let res = await user.mainActor.reserve(user.accountId);
+    let res = await user.mainActor.reserve(user.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
     expect(res['err']).toContain('sale has not started');
   });
 });

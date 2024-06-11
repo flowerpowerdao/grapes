@@ -3,7 +3,17 @@
   record {
     name = "Collection Name";
     sale = variant { supply = 3 };
-    salePrice = 700_000_000; // 7 ICP
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 700_000_000; // 7 ICP
+      };
+      record {
+        ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
+        price = 1100_000_000; // 11 SEED
+        limit = opt 2;
+      };
+    };
     publicSaleStart = 1686117482129000000;
     salesDistribution = vec {};
     royalties = vec {};

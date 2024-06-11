@@ -1,10 +1,11 @@
-import { AccountIdentifier } from '@dfinity/nns';
+import { AccountIdentifier } from '@dfinity/ledger-icp';
 import { describe, test, expect, it } from 'vitest';
 import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './env';
+import {Principal} from '@dfinity/principal';
 
 describe('sale and royalty fees', () => {
   let price = 1_000_000n;
@@ -31,15 +32,15 @@ describe('sale and royalty fees', () => {
   });
 
   it('buy from sale', async () => {
-    let settings = await seller.mainActor.salesSettings(seller.accountId);
-    let res = await seller.mainActor.reserve(seller.accountId);
+    let settings = await seller.mainActor.salesSettings(seller.address);
+    let res = await seller.mainActor.reserve(seller.address, Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
     expect(res).toHaveProperty('ok');
 
     if ('ok' in res) {
       let paymentAddress = res.ok[0];
       let paymentAmount = res.ok[1];
-      expect(paymentAddress.length).toBe(64);
+      expect(paymentAddress.length).toBeGreaterThanOrEqual(38);
       expect(paymentAmount).toBe(settings.price);
 
       await seller.sendICP(paymentAddress, paymentAmount);

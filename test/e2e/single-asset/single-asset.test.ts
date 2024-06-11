@@ -9,14 +9,16 @@ describe('single asset collection', () => {
   test('check getTokenToAssetMapping', async () => {
     let tokenToAsset = await user.mainActor.getTokenToAssetMapping();
 
-    tokenToAsset.forEach(([index, asset], i) => {
-      expect(index).toBe(i);
-      expect(asset).toBe('privat');
-    });
+    tokenToAsset
+      .sort((a, b) => a[0] - b[0])
+      .forEach(([index, asset], i) => {
+        expect(index).toBe(i);
+        expect(asset).toBe('privat');
+      });
   });
 
   test('check metadata of each token', async () => {
-    let settings = await user.mainActor.salesSettings(user.accountId);
+    let settings = await user.mainActor.salesSettings(user.address);
     for (let i = 0; i < settings.totalToSell; i++) {
       expect(await user.mainActor.metadata(tokenIdentifier(i))).toEqual({
         ok: {

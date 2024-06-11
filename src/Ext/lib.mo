@@ -41,7 +41,9 @@ module {
 
     public func getRegistry() : [(Types.TokenIndex, Types.AccountIdentifier)] {
       Iter.toArray(deps._Tokens.getRegistry().entries());
-
+      // Iter.toArray(Iter.map<(Types.TokenIndex, Types.AccountIdentifier), (Types.TokenIndex, RootTypes.Address)>(deps._Tokens.getRegistry().entries(), func((tid, address)) {
+      //   (tid, Utils.toAccountId(address));
+      // }));
     };
 
     public func getTokens() : [(Types.TokenIndex, Types.Metadata)] {

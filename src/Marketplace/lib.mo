@@ -1,12 +1,7 @@
-import Ledger "canister:ledger";
-
 import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
-import List "mo:base/List";
 import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
-import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
@@ -15,10 +10,10 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Buffer "mo:base/Buffer";
 
-import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
-import Encoding "mo:encoding/Binary";
+import { fromPrincipal; addHash; } "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
+import LedgerTypes "mo:ledger-types";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -207,7 +202,8 @@ module {
         };
       };
 
-      let response = await Ledger.account_balance({
+      let ledger = actor("ryjl3-tyaaa-aaaaa-aaaba-cai") : LedgerTypes.Service;
+      let response = await ledger.account_balance({
         account = addHash(fromPrincipal(config.canister, ?settlement.subaccount));
       });
 
@@ -243,7 +239,8 @@ module {
       for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
-          to = f.0;
+          ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+          to = Utils.toAccountId(f.0);
           fromSubaccount = settlement.subaccount;
           amount = _fee;
           tokenIndex = token;
@@ -255,6 +252,7 @@ module {
       let sellerFrontend = getFrontend(settlement.sellerFrontend);
       let sellerFrontendFee = bal * sellerFrontend.fee / 100000;
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = sellerFrontend.accountIdentifier;
         fromSubaccount = settlement.subaccount;
         amount = sellerFrontendFee;
@@ -266,6 +264,7 @@ module {
       let buyerFrontend = getFrontend(settlement.buyerFrontend);
       let buyerFrontendFee = bal * buyerFrontend.fee / 100000;
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = buyerFrontend.accountIdentifier;
         fromSubaccount = settlement.subaccount;
         amount = buyerFrontendFee;
@@ -275,26 +274,12 @@ module {
 
       // disbursement to seller
       deps._Disburser.addDisbursement({
+        ledger = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
         to = tokenOwner;
         fromSubaccount = settlement.subaccount;
         amount = rem;
         tokenIndex = token;
       });
-
-      // add event to CAP
-      let event : Root.IndefiniteEvent = {
-        operation = "sale";
-        details = [
-          ("to", #Text(settlement.buyer)),
-          ("from", #Principal(settlement.seller)),
-          ("price_decimals", #U64(8)),
-          ("price_currency", #Text("ICP")),
-          ("price", #U64(settlement.price)),
-          ("token_id", #Text(tokenid)),
-        ];
-        caller;
-      };
-      ignore deps._Cap.insert(event);
 
       // transfer token to new owner
       deps._Tokens.transferTokenToUser(token, settlement.buyer);
@@ -310,6 +295,21 @@ module {
       });
       _tokenListing.delete(token);
       _tokenSettlement.delete(token);
+
+      // add event to CAP
+      let event : Root.IndefiniteEvent = {
+        operation = "sale";
+        details = [
+          ("to", #Text(settlement.buyer)),
+          ("from", #Principal(settlement.seller)),
+          ("price_decimals", #U64(8)),
+          ("price_currency", #Text("ICP")),
+          ("price", #U64(settlement.price)),
+          ("token_id", #Text(tokenid)),
+        ];
+        caller;
+      };
+      ignore deps._Cap.insert(event);
 
       return #ok();
     };
@@ -472,10 +472,6 @@ module {
 
     public func pendingCronJobs() : Nat {
       unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
-    };
-
-    public func toAccountIdentifier(p : Text, sa : Nat) : Types.AccountIdentifier {
-      AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
     public func frontends() : [(Text, Types.Frontend)] {

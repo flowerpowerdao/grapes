@@ -6,8 +6,8 @@ export default () => {
     test: true,
     restoreEnabled: false,
     timersInterval: 10, // seconds
-    beneficiary0: beneficiaries[0].accountId,
-    beneficiary1: beneficiaries[1].accountId,
+    beneficiary0: beneficiaries[0].address,
+    beneficiary1: beneficiaries[1].address,
     salesDistribution0: 45000n,
     salesDistribution1: 10125n,
     royalty0: 3375n,

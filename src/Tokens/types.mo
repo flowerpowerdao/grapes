@@ -2,6 +2,7 @@ import Time "mo:base/Time";
 
 import ExtCommon "../toniq-labs/ext/Common";
 import ExtCore "../toniq-labs/ext/Core";
+import RootTypes "../types";
 
 module {
   public type StableChunk = ?{
@@ -24,6 +25,7 @@ module {
   public type Time = Time.Time;
   public type SubAccount = ExtCore.SubAccount;
   public type CommonError = ExtCore.CommonError;
+  public type Address = RootTypes.Address;
 
   public type Listing = {
     seller : Principal;

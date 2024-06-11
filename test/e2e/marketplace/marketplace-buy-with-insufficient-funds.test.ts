@@ -1,4 +1,4 @@
-import { AccountIdentifier } from '@dfinity/nns';
+import { AccountIdentifier } from '@dfinity/ledger-icp';
 import { describe, test, expect, it } from 'vitest';
 import { ICP_FEE } from '../consts';
 import { User } from '../user';

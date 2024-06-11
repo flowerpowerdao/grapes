@@ -42,6 +42,8 @@ export let backup = async ({network, file, chunkSize}) => {
       return Array.from(val);
     } else if (typeof val === 'bigint') {
       return `###bigint:${String(val)}`;
+    } else if (val.__principal__) {
+      return `###principal:${val.__principal__}`;
     } else if (val instanceof Principal) {
       return `###principal:${val.toText()}`;
     } else {

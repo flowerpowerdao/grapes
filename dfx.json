@@ -4,43 +4,55 @@
     "staging": {
       "type": "motoko",
       "main": "src/main.mo",
+      "init_arg_file": "initArgs.local.did",
+      "specified_id": "rrkah-fqaaa-aaaaa-aaaaq-cai",
       "declarations": {
         "output": "declarations/main"
-      },
-      "dependencies": [
-        "ledger"
-      ]
+      }
     },
     "ledger": {
       "type": "custom",
       "wasm": "declarations/ledger/ledger.wasm.gz",
       "candid": "declarations/ledger/ledger.did",
+      "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
       "remote": {
         "id": {
           "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }
       }
     },
+    "seed": {
+      "type": "custom",
+      "wasm": "declarations/ledger/ledger.wasm.gz",
+      "candid": "declarations/ledger/ledger.did",
+      "specified_id": "fua74-fyaaa-aaaan-qecrq-cai",
+      "remote": {
+        "id": {
+          "ic": "fua74-fyaaa-aaaan-qecrq-cai"
+        }
+      }
+    },
     "test": {
       "type": "custom",
       "wasm": ".dfx/local/canisters/staging/staging.wasm",
-      "candid": ".dfx/local/canisters/staging/staging.did"
+      "candid": ".dfx/local/canisters/staging/staging.did",
+      "init_arg_file": "test/e2e/initArgs.did",
+      "specified_id": "r7inp-6aaaa-aaaaa-aaabq-cai"
     },
     "production": {
       "type": "motoko",
       "main": "src/main.mo",
-      "dependencies": [
-        "ledger"
-      ]
+      "init_arg_file": "initArgs.did"
     },
     "assets": {
       "type": "assets",
       "source": [
         "assets/"
-      ]
+      ],
+      "specified_id": "e2ezq-2aaaa-aaaal-aafwa-cai"
     }
   },
-  "dfx": "0.20.0",
+  "dfx": "0.20.1",
   "defaults": {
     "build": {
       "packtool": "mops sources",
