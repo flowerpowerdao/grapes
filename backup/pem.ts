@@ -19,6 +19,6 @@ export function decode(rawKey: string) {
   if (buf.length != 85) {
     throw 'expecting byte length 85 but got ' + buf.length;
   }
-  let secretKey = Buffer.concat([buf.slice(16, 48), buf.slice(53, 85)]);
+  let secretKey = Buffer.concat([buf.slice(16, 48)]);
   return Ed25519KeyIdentity.fromSecretKey(secretKey);
 }

@@ -464,7 +464,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.failedSales();
   };
 
-  public query func saleTransactions() : async [SaleTypes.SaleTransaction] {
+  public query func saleTransactions() : async [SaleTypes.SaleTransactionV3] {
     _Sale.saleTransactions();
   };
 

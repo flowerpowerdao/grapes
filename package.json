@@ -32,6 +32,7 @@
     "test-br": "npm run deploy-test && tsx ./backup/test.ts",
     "test-br-assets": "tsx ./backup/test-assets.ts",
     "deploy": "tsx ./deploy/deploy.ts",
+    "upgrade-staging": "dfx deploy --network ic staging --upgrade-unchanged",
     "upgrade-production": "dfx canister --network ic stop production && dfx deploy --network ic production --upgrade-unchanged && dfx canister --network ic start production",
     "": ""
   },

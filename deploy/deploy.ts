@@ -35,7 +35,7 @@ let identity = decode(pemData);
 let actor = getActor(network, identity);
 
 if (mode === 'reinstall') {
-  console.log(chalk.yellow('REINSTALL MODE'));
+  console.log(chalk.yellow('(!!!) REINSTALL MODE'));
 }
 console.log(chalk.yellow(`Identity: ${identityName}`));
 console.log(chalk.yellow(`Controller: ${identity.getPrincipal().toText()}`));
