@@ -1,0 +1,58 @@
+(
+  principal "pzd64-5yaaa-aaaap-ahljq-cai", // production canister
+  record {
+    name = "Grapes of Wrath";
+    sale = variant { supply = 3333 };
+    salePrices = vec {
+      record {
+        ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+        price = 300_000_000; // 3 ICP
+      };
+      record {
+        ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
+        price = 300_00_000_000; // 300 SEED
+        limit = opt 666;
+      };
+    };
+    publicSaleStart = 1719061200000000000; // 2024-06-22 13:00 UTC
+    salesDistribution = vec {
+      record { "cicu4-gmfmk-kc7yi-owxpj-dsujj-7g7lg-4rtrm-xioal-pkyyx-gqql5-qqe"; 73000 }; // ludo
+      record { "yd4yr-jipr2-g7mil-pednz-hviql-euq5t-sbpdt-yzd2u-w4uwy-rxeqp-aae"; 27000 }; // zen
+    };
+    royalties = vec {
+      record { "cicu4-gmfmk-kc7yi-owxpj-dsujj-7g7lg-4rtrm-xioal-pkyyx-gqql5-qqe"; 5475 }; // ludo
+      record { "yd4yr-jipr2-g7mil-pednz-hviql-euq5t-sbpdt-yzd2u-w4uwy-rxeqp-aae"; 2025 }; // zen
+    };
+    marketplaces = vec {
+      // first marketplace is default
+      record { "entrepot"; "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
+      record { "dgdg"; "1637b41f59e2cfe0d2cb343c2ac945dd494ee2d8e741db4daf6863a518bdb5d4"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
+      record { "yumi"; "5780292b94594bfc2314f29a81bef85eed2938d89d9b825a4f0f07a8a88609bc"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
+    };
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+    // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
+    revealDelay = variant { hours = 24 };
+    timersInterval = opt variant { minutes = 2 };
+    airdrop = vec {};
+    whitelists = vec {
+      record {
+        name = "punks";
+        prices = vec {
+          record {
+            ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
+            price = 150_000_000; // 1.5 ICP
+          };
+          record {
+            ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
+            price = 15000_000_000; // 150 SEED
+            limit = opt 3;
+          };
+        };
+        oneTimeOnly = false;
+        startTime = 1718974800000000000; // 2024-06-21 13:00 UTC
+        endTime = opt 1719061200000000000; // 2024-06-22 13:00 UTC
+        addresses = vec {};
+      };
+    };
+  }
+)

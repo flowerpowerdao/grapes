@@ -1,0 +1,11 @@
+{
+  "assets": {
+    "ic": "drhwg-xyaaa-aaaam-acqvq-cai"
+  },
+  "staging": {
+    "ic": "ubcso-fqaaa-aaaan-qlrca-cai"
+  },
+  "production": {
+    "ic": "pzd64-5yaaa-aaaap-ahljq-cai"
+  }
+}
