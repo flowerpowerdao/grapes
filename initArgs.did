@@ -10,8 +10,7 @@
       };
       record {
         ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
-        price = 300_00_000_000; // 300 SEED
-        limit = opt 666;
+        price = 220_00_000_000; // 220 SEED
       };
     };
     publicSaleStart = 1719061200000000000; // 2024-06-22 13:00 UTC
@@ -31,12 +30,12 @@
     };
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay = variant { hours = 24 };
+    revealDelay = variant { hours = 48 };
     timersInterval = opt variant { minutes = 2 };
     airdrop = vec {};
     whitelists = vec {
       record {
-        name = "punks";
+        name = "punks2";
         prices = vec {
           record {
             ledger = principal "ryjl3-tyaaa-aaaaa-aaaba-cai";
@@ -44,13 +43,11 @@
           };
           record {
             ledger = principal "fua74-fyaaa-aaaan-qecrq-cai";
-            price = 150_00_000_000; // 150 SEED
-            limit = opt 3;
+            price = 110_00_000_000; // 110 SEED
           };
         };
         oneTimeOnly = false;
-        startTime = 1718974800000000000; // 2024-06-21 13:00 UTC
-        endTime = opt 1719061200000000000; // 2024-06-22 13:00 UTC
+        startTime = 1719147600000000000; // 2024-06-23 13:00 UTC
         addresses = vec {
           "a5cc1ae1dc3288cf37ae6c5a61748a55dfd6eccbca47bc9ba0cf013d74c6adb4";
           "93f39d1a5df51e3696b742f6e18c3db037b946b06142db9a4194d5d07ed3bee3";
